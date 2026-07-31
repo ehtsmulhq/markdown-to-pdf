@@ -3,7 +3,7 @@ import puppeteer, { type Browser } from "puppeteer";
 let browser: Browser | null = null;
 
 async function getBrowser(): Promise<Browser> {
-  if (!browser || !browser.connected) {
+  if (!browser || !browser.isConnected()) {
     const launchOptions: Parameters<typeof puppeteer.launch>[0] = {
       headless: true,
       args: [
@@ -37,8 +37,9 @@ export async function htmlToPdf(
       a4: "A4",
       a3: "A3",
     };
+    const formatKey = (pageType || "a4").toLowerCase();
     const pdf = await page.pdf({
-      format: pdfFormats[pageType] as "Letter" | "A4" | "A3",
+      format: (pdfFormats[formatKey] || "A4") as "Letter" | "A4" | "A3",
       printBackground: true,
       margin: {
         top: "2cm",
@@ -53,10 +54,10 @@ export async function htmlToPdf(
   }
 }
 
-export default async function closeBrowser(): Promise<void> {
+export async function closeBrowser(): Promise<void> {
   if (browser) {
     await browser.close();
     browser = null;
   }
 }
-export { closeBrowser };
+export default closeBrowser;

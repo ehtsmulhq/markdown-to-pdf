@@ -17,7 +17,7 @@ router.post("/", async (req: Request, res: Response) => {
   }
 
   try {
-    const html = markdownToHtml(markdown, fontFamily);
+    const html = await markdownToHtml(markdown, fontFamily);
     const pdf = await htmlToPdf(html, pageType);
 
     res.setHeader("Content-Type", "application/pdf");

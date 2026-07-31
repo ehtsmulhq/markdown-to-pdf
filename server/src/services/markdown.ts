@@ -15,10 +15,10 @@ const FONT_MAP: Record<FontFamilyChoice, string> = {
   modern: '"Inter", "Roboto", "Helvetica Neue", Arial, sans-serif',
 };
 
-export function markdownToHtml(
+export async function markdownToHtml(
   markdown: string,
   fontFamily: FontFamilyChoice = "sans"
-): string {
+): Promise<string> {
   const selectedFontStack = FONT_MAP[fontFamily] || FONT_MAP.sans;
 
   const PRINT_STYLES = `
@@ -174,7 +174,7 @@ export function markdownToHtml(
     .replace(/\\pagebreak/gi, '<div class="page-break"></div>')
     .replace(/\[\[pagebreak\]\]/gi, '<div class="page-break"></div>');
 
-  const body = marked.parse(processedMarkdown) as string;
+  const body = await marked.parse(processedMarkdown);
 
   return `<!DOCTYPE html>
 <html lang="en">
