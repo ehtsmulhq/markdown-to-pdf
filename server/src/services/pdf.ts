@@ -4,7 +4,7 @@ let browser: Browser | null = null;
 
 async function getBrowser(): Promise<Browser> {
   if (!browser || !browser.connected) {
-    browser = await puppeteer.launch({
+    const launchOptions: Parameters<typeof puppeteer.launch>[0] = {
       headless: true,
       args: [
         "--no-sandbox",
@@ -12,7 +12,13 @@ async function getBrowser(): Promise<Browser> {
         "--disable-dev-shm-usage",
         "--disable-gpu",
       ],
-    });
+    };
+
+    if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+      launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+    }
+
+    browser = await puppeteer.launch(launchOptions);
   }
   return browser;
 }
@@ -47,9 +53,10 @@ export async function htmlToPdf(
   }
 }
 
-export async function closeBrowser(): Promise<void> {
+export default async function closeBrowser(): Promise<void> {
   if (browser) {
     await browser.close();
     browser = null;
   }
 }
+export { closeBrowser };
