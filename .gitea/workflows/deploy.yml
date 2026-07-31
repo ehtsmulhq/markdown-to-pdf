@@ -26,7 +26,7 @@ jobs:
       - name: Build Server and Client
         run: npm run build
 
-  docker-build:
+  deploy:
     needs: build-and-test
     runs-on: [ubuntu-latest, self-hosted, linux, host, docker]
 
@@ -34,5 +34,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Build Docker Container Image
-        run: docker build -t md-to-pdf:latest .
+      - name: Build & Run with Docker Compose
+        run: |
+          docker compose down || true
+          docker compose up -d --build --force-recreate

@@ -7,7 +7,8 @@ services:
       dockerfile: Dockerfile
     container_name: md_to_pdf_app
     ports:
-      - "4231:3000"  # External Host Port 4231 -> Container Unified Port 3000
+      - "8089:3000"   # Frontend UI on host port 8089
+      - "4000:4000"   # Backend API on host port 4000
     environment:
       - NODE_ENV=production
       - PORT=4000
