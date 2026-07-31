@@ -7,10 +7,8 @@ services:
       dockerfile: Dockerfile
     container_name: md_to_pdf_app
     ports:
-      - "3000:3000"
-      - "4000:4000"
+      - "3000:3000"  # Single Unified Port for UI & PDF Conversion API
     environment:
       - NODE_ENV=production
       - PORT=4000
-      - NEXT_PUBLIC_API_URL=http://localhost:4000
     restart: unless-stopped
