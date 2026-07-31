@@ -1,4 +1,4 @@
-name: 🚀 Production CI/CD Pipeline — MD to PDF Studio
+name: Deploy Markdown to PDF App
 
 on:
   push:
@@ -11,64 +11,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint-and-typecheck:
-    name: 🔍 Lint & TypeCheck
+  deploy:
+    name: 🚀 Production Docker Deployment
     runs-on: [ubuntu-latest, self-hosted, linux, host, docker]
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
 
-      - name: 🟢 Setup Node.js v20
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: 📦 Install Dependencies
-        run: npm ci
-
-      - name: 🛡️ TypeCheck Server TypeScript
-        run: npm --prefix server run build
-
-  build-and-test:
-    name: 🏗️ Build Production Bundles
-    needs: lint-and-typecheck
-    runs-on: [ubuntu-latest, self-hosted, linux, host, docker]
     steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v4
 
-      - name: 🟢 Setup Node.js v20
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: 📦 Install Dependencies
-        run: npm ci
-
-      - name: ⚡ Build Client & Server Bundles
-        run: npm run build
-
-  deploy-production:
-    name: 🐳 Production Docker Deployment
-    needs: build-and-test
-    runs-on: [ubuntu-latest, self-hosted, linux, host, docker]
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+      - name: 🧹 Prune Unused Docker Cache & Temp Files
+        run: |
+          docker system prune -f || true
 
       - name: 🚀 Rebuild & Deploy Container
         run: |
-          echo "Building and deploying MD to PDF Studio container..."
           docker compose down || true
           docker compose up -d --build --force-recreate
 
       - name: 🏥 Container Health Check
         run: |
-          echo "Verifying application status..."
-          sleep 5
+          sleep 3
           docker ps --filter "name=md_to_pdf_app"
