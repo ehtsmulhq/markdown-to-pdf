@@ -63,11 +63,25 @@ export default function MarkdownPreview({
     .replace(/\[\[pagebreak\]\]/gi, '<div class="page-break-tag"></div>')
     .replace(/<div\s+class=["']page-break["']\s*>\s*<\/div>/gi, '<div class="page-break-tag"></div>');
 
-  useEffect(() => {
+  const recalculatePageCount = () => {
     if (!contentRef.current) return;
     const contentHeight = contentRef.current.scrollHeight - spec.marginVert * 2;
     const pages = Math.ceil(contentHeight / spec.printableHeight);
     setTotalPages(Math.max(pages, 1));
+  };
+
+  useEffect(() => {
+    recalculatePageCount();
+
+    // Recalculate when external images finish loading in preview
+    const images = contentRef.current?.querySelectorAll("img");
+    if (images && images.length > 0) {
+      images.forEach((img) => {
+        if (!img.complete) {
+          img.addEventListener("load", recalculatePageCount, { once: true });
+        }
+      });
+    }
   }, [content, pageType, fontFamily, spec.marginVert, spec.printableHeight]);
 
   const handleScroll = () => {
