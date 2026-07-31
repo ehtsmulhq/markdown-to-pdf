@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ main, master ]
 
+env:
+  PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
+
 concurrency:
   group: production-deploy
   cancel-in-progress: true
