@@ -1,0 +1,74 @@
+name: 🚀 Production CI/CD Pipeline — MD to PDF Studio
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
+jobs:
+  lint-and-typecheck:
+    name: 🔍 Lint & TypeCheck
+    runs-on: [ubuntu-latest, self-hosted, linux, host, docker]
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: 🟢 Setup Node.js v20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+
+      - name: 🛡️ TypeCheck Server TypeScript
+        run: npm --prefix server run build
+
+  build-and-test:
+    name: 🏗️ Build Production Bundles
+    needs: lint-and-typecheck
+    runs-on: [ubuntu-latest, self-hosted, linux, host, docker]
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js v20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+
+      - name: ⚡ Build Client & Server Bundles
+        run: npm run build
+
+  deploy-production:
+    name: 🐳 Production Docker Deployment
+    needs: build-and-test
+    runs-on: [ubuntu-latest, self-hosted, linux, host, docker]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🚀 Rebuild & Deploy Container
+        run: |
+          echo "Building and deploying MD to PDF Studio container..."
+          docker compose down || true
+          docker compose up -d --build --force-recreate
+
+      - name: 🏥 Container Health Check
+        run: |
+          echo "Verifying application status..."
+          sleep 5
+          docker ps --filter "name=md_to_pdf_app"
