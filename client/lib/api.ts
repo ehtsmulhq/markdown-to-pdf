@@ -5,9 +5,17 @@ export async function convertToPdf(
   pageType: "letter" | "a4" | "a3" = "a4",
   fontFamily: FontFamilyChoice = "sans"
 ): Promise<Blob> {
-  // Use NEXT_PUBLIC_API_URL if explicitly set, otherwise relative '/api/convert' works dynamically on ANY IP/domain
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-  const endpoint = baseUrl ? `${baseUrl.replace(/\/$/, "")}/api/convert` : "/api/convert";
+  // Determine API conversion endpoint dynamically:
+  // 1. Explicit NEXT_PUBLIC_API_URL if configured during build
+  // 2. Dynamic browser window.location.origin (e.g. http://192.168.0.127:4000/api/convert)
+  // 3. Fallback relative '/api/convert'
+  let endpoint = "/api/convert";
+
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    endpoint = `${process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, "")}/api/convert`;
+  } else if (typeof window !== "undefined" && window.location?.origin) {
+    endpoint = `${window.location.origin}/api/convert`;
+  }
 
   let response: Response;
   try {
