@@ -1,23 +1,17 @@
-name: Build & Deploy Markdown to PDF
+name: Deploy Markdown to PDF App
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches:
+      - main
+      - master
 
 jobs:
   deploy:
-    runs-on: [ubuntu-latest, self-hosted, linux, host, docker]
-
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        run: |
-          git config --global --add safe.directory "*" || true
-          if [ -d ".git" ]; then
-            git fetch origin main || true
-            git reset --hard origin/main || true
-          fi
+        uses: actions/checkout@v3
 
       - name: Build & Run with Docker Compose
         run: |
