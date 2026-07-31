@@ -1,5 +1,3 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-
 export type FontFamilyChoice = "sans" | "serif" | "mono" | "garamond" | "modern";
 
 export async function convertToPdf(
@@ -7,9 +5,13 @@ export async function convertToPdf(
   pageType: "letter" | "a4" | "a3" = "a4",
   fontFamily: FontFamilyChoice = "sans"
 ): Promise<Blob> {
+  // Use NEXT_PUBLIC_API_URL if explicitly set, otherwise relative '/api/convert' works dynamically on ANY IP/domain
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+  const endpoint = baseUrl ? `${baseUrl.replace(/\/$/, "")}/api/convert` : "/api/convert";
+
   let response: Response;
   try {
-    response = await fetch(`${API_URL}/api/convert`, {
+    response = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ markdown, pageType, fontFamily }),
@@ -17,7 +19,7 @@ export async function convertToPdf(
   } catch (err) {
     console.error("Network / fetch error:", err);
     throw new Error(
-      "Cannot connect to conversion server. Please ensure the backend server is running on port 4000."
+      "Cannot connect to conversion server. Please ensure the backend server is running."
     );
   }
 
