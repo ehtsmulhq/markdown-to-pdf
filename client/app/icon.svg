@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c5cfc" />
+      <stop offset="100%" stop-color="#4c1d95" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#e0e7ff" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Rounded Background Badge -->
+  <rect x="2" y="2" width="28" height="28" rx="8" fill="url(#bgGrad)" />
+  
+  <!-- Document Sheet Graphic -->
+  <path d="M9 7h9l6 6v12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z" fill="none" stroke="url(#accentGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Folded Corner -->
+  <path d="M18 7v6h6" fill="none" stroke="url(#accentGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Content Lines -->
+  <line x1="11" y1="15" x2="17" y2="15" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" />
+  <line x1="11" y1="19" x2="21" y2="19" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" />
+</svg>

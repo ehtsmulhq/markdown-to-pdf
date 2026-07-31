@@ -1,0 +1,121 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Crisp Snow Light Mode Palette */
+  :root {
+    --background: #f8fafc;
+    --surface: #ffffff;
+    --elevated: #f1f5f9;
+    --surface-hover: #e2e8f0;
+    --border: #e2e8f0;
+    --border-subtle: #cbd5e1;
+    --foreground: #0f172a;
+    --muted: #64748b;
+    --muted-foreground: #94a3b8;
+    --shadow-paper: 0 10px 30px -5px rgba(0, 0, 0, 0.06), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  }
+
+  /* Deep Midnight Obsidian Dark Mode Palette */
+  .dark {
+    --background: #0b0f19;
+    --surface: #111827;
+    --elevated: #1f2937;
+    --surface-hover: #374151;
+    --border: #1f2937;
+    --border-subtle: #374151;
+    --foreground: #f3f4f6;
+    --muted: #9ca3af;
+    --muted-foreground: #6b7280;
+    --shadow-paper: 0 20px 50px -10px rgba(0, 0, 0, 0.75);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    @apply antialiased transition-colors duration-200;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-subtle);
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--muted);
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-subtle) transparent;
+  }
+
+  ::selection {
+    background: rgba(99, 102, 241, 0.25);
+    color: var(--foreground);
+  }
+
+  /* Dynamic select options */
+  select option {
+    background: var(--surface);
+    color: var(--foreground);
+  }
+}
+
+@layer components {
+  .glass {
+    background: var(--surface);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .btn-primary {
+    @apply relative overflow-hidden rounded-lg px-5 py-2 text-sm font-semibold text-white transition-all duration-200;
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    box-shadow: 0 2px 14px rgba(99, 102, 241, 0.35);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 22px rgba(99, 102, 241, 0.5);
+    background: linear-gradient(135deg, #818cf8, #6366f1);
+  }
+
+  .btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .btn-secondary {
+    @apply rounded-lg border border-border px-3.5 py-2 text-sm font-medium text-muted transition-all duration-200;
+    background: var(--elevated);
+  }
+
+  .btn-secondary:hover {
+    @apply border-accent text-foreground;
+    background: var(--surface-hover);
+  }
+}
