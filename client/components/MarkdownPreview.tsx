@@ -73,7 +73,7 @@ export default function MarkdownPreview({
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobileScreen(window.innerWidth < 640);
+      setIsMobileScreen(window.innerWidth < 768);
     };
     checkMobile();
     window.addEventListener("resize", checkMobile);
@@ -130,11 +130,11 @@ export default function MarkdownPreview({
   }
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden bg-background transition-colors duration-200">
+    <div className="flex flex-1 flex-col overflow-hidden bg-background transition-colors duration-200 w-full min-w-0">
       {/* Preview toolbar */}
-      <div className="flex h-10 items-center justify-between border-b border-border bg-surface px-4 text-xs text-muted transition-colors duration-200">
-        <div className="flex items-center gap-2">
-          <span className="font-semibold text-foreground flex items-center gap-1.5">
+      <div className="flex h-10 items-center justify-between border-b border-border bg-surface px-3 sm:px-4 text-xs text-muted transition-colors duration-200 flex-shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <span className="font-semibold text-foreground flex items-center gap-1.5 text-[11px] sm:text-xs">
             <svg className="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -142,17 +142,17 @@ export default function MarkdownPreview({
             PDF Preview
           </span>
           <span className="text-muted-foreground">•</span>
-          <span className="text-foreground font-medium">
+          <span className="text-foreground font-medium text-[11px] sm:text-xs">
             Page {currentPage} of {totalPages}
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Page Breaks guide toggle */}
           <button
             type="button"
             onClick={() => setShowPageGuides(!showPageGuides)}
-            className={`flex items-center gap-1 text-[11px] transition-colors px-2 py-1 rounded border ${
+            className={`flex items-center gap-1 text-[10px] sm:text-[11px] transition-colors px-1.5 sm:px-2 py-1 rounded border ${
               showPageGuides
                 ? "bg-accent/15 border-accent/40 text-accent font-medium"
                 : "bg-elevated border-border text-muted hover:text-foreground"
@@ -162,10 +162,11 @@ export default function MarkdownPreview({
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h8M8 12h8m-8 5h8" />
             </svg>
-            <span>Page Breaks: {showPageGuides ? "ON" : "OFF"}</span>
+            <span className="hidden sm:inline">Page Breaks: {showPageGuides ? "ON" : "OFF"}</span>
+            <span className="sm:hidden">{showPageGuides ? "Breaks ON" : "Breaks OFF"}</span>
           </button>
 
-          <span className="font-semibold text-muted-foreground uppercase text-[11px] bg-elevated px-2 py-0.5 rounded border border-border">
+          <span className="font-semibold text-muted-foreground uppercase text-[10px] sm:text-[11px] bg-elevated px-1.5 sm:px-2 py-0.5 rounded border border-border flex-shrink-0">
             {pageType}
           </span>
         </div>
@@ -175,22 +176,22 @@ export default function MarkdownPreview({
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto p-2 sm:p-4 md:p-8 flex justify-center bg-background relative transition-colors duration-200"
+        className="flex-1 overflow-y-auto p-2 sm:p-4 md:p-8 flex justify-center bg-background relative transition-colors duration-200 w-full min-w-0"
       >
         <div 
-          style={{ maxWidth: `${spec.width}px` }} 
-          className="w-full relative transition-all duration-300 max-w-full overflow-hidden"
+          style={{ maxWidth: isMobileScreen ? "100%" : `${spec.width}px` }} 
+          className="w-full relative transition-all duration-300 min-w-0"
         >
           <div
             ref={contentRef}
             style={{
-              padding: isMobileScreen ? "1.25rem 0.85rem" : `${spec.marginVert}px`,
+              padding: isMobileScreen ? "1.25rem 1rem" : `${spec.marginVert}px`,
               fontFamily: selectedFontStack,
             }}
-            className={`min-h-[600px] sm:min-h-[750px] rounded-xl shadow-paper border transition-all duration-200 relative text-[10pt] sm:text-[11pt] leading-[1.6] max-w-full overflow-x-hidden ${
+            className={`min-h-[500px] sm:min-h-[750px] rounded-xl shadow-paper border transition-all duration-200 relative text-[10pt] sm:text-[11pt] leading-[1.6] w-full min-w-0 box-border break-words [overflow-wrap:anywhere] ${
               isDark
-                ? "bg-surface text-foreground border-border prose prose-invert max-w-none prose-headings:font-semibold prose-headings:text-foreground prose-a:text-accent prose-code:rounded prose-code:bg-elevated prose-code:px-1.5 prose-code:py-0.5 prose-code:before:content-none prose-code:after:content-none prose-pre:bg-elevated prose-blockquote:border-l-accent"
-                : "bg-white text-slate-900 border-slate-200 prose prose-slate max-w-none prose-headings:font-semibold prose-headings:text-slate-900 prose-a:text-indigo-600 prose-code:rounded prose-code:bg-slate-100 prose-code:text-slate-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:before:content-none prose-code:after:content-none prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-blockquote:border-l-indigo-500"
+                ? "bg-surface text-foreground border-border prose prose-invert max-w-none prose-headings:font-semibold prose-headings:text-foreground prose-headings:break-words prose-p:break-words prose-li:break-words prose-a:text-accent prose-code:rounded prose-code:bg-elevated prose-code:px-1.5 prose-code:py-0.5 prose-code:before:content-none prose-code:after:content-none prose-pre:bg-elevated prose-blockquote:border-l-accent"
+                : "bg-white text-slate-900 border-slate-200 prose prose-slate max-w-none prose-headings:font-semibold prose-headings:text-slate-900 prose-headings:break-words prose-p:break-words prose-li:break-words prose-a:text-indigo-600 prose-code:rounded prose-code:bg-slate-100 prose-code:text-slate-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:before:content-none prose-code:after:content-none prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-blockquote:border-l-indigo-500"
             }`}
           >
             {/* Clean Mathematical Page Break Guidelines Overlay */}
@@ -202,7 +203,7 @@ export default function MarkdownPreview({
                   className="absolute left-0 right-0 z-20 pointer-events-none flex items-center justify-between px-2 -translate-y-1/2"
                 >
                   <div className="h-[2px] flex-1 bg-gradient-to-r from-purple-500 via-indigo-500 to-purple-500 opacity-60 border-t-2 border-dashed border-indigo-500" />
-                  <span className="mx-2 px-2.5 py-0.5 rounded-full bg-indigo-600 text-[10px] font-bold text-white shadow-md uppercase tracking-wider">
+                  <span className="mx-2 px-2 py-0.5 rounded-full bg-indigo-600 text-[9px] sm:text-[10px] font-bold text-white shadow-md uppercase tracking-wider whitespace-nowrap">
                     ✂ PAGE {idx + 2} BREAK
                   </span>
                   <div className="h-[2px] flex-1 bg-gradient-to-r from-purple-500 via-indigo-500 to-purple-500 opacity-60 border-t-2 border-dashed border-indigo-500" />
@@ -216,7 +217,7 @@ export default function MarkdownPreview({
                   if (className === "page-break-tag" || className === "page-break") {
                     return (
                       <div
-                        className="my-8 py-2 border-y border-dashed border-indigo-500/60 bg-indigo-500/10 rounded flex items-center justify-center gap-2 text-indigo-500 font-semibold text-[11px] uppercase tracking-wider select-none"
+                        className="my-6 sm:my-8 py-2 border-y border-dashed border-indigo-500/60 bg-indigo-500/10 rounded flex items-center justify-center gap-2 text-indigo-500 font-semibold text-[10px] sm:text-[11px] uppercase tracking-wider select-none"
                         {...props}
                       >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -228,10 +229,25 @@ export default function MarkdownPreview({
                   }
                   return <div className={className} {...props}>{children}</div>;
                 },
+                h1({ children, ...props }) {
+                  return <h1 className="break-words [overflow-wrap:anywhere]" {...props}>{children}</h1>;
+                },
+                h2({ children, ...props }) {
+                  return <h2 className="break-words [overflow-wrap:anywhere]" {...props}>{children}</h2>;
+                },
+                h3({ children, ...props }) {
+                  return <h3 className="break-words [overflow-wrap:anywhere]" {...props}>{children}</h3>;
+                },
+                p({ children, ...props }) {
+                  return <p className="break-words [overflow-wrap:anywhere]" {...props}>{children}</p>;
+                },
+                li({ children, ...props }) {
+                  return <li className="break-words [overflow-wrap:anywhere]" {...props}>{children}</li>;
+                },
                 table({ children, ...props }) {
                   return (
-                    <div className="overflow-x-auto my-6 rounded-lg border border-border/80 shadow-sm break-inside-avoid max-w-full">
-                      <table className="w-full border-collapse text-left text-sm" {...props}>
+                    <div className="overflow-x-auto my-4 sm:my-6 rounded-lg border border-border/80 shadow-sm break-inside-avoid max-w-full w-full">
+                      <table className="w-full border-collapse text-left text-xs sm:text-sm" {...props}>
                         {children}
                       </table>
                     </div>
@@ -239,21 +255,21 @@ export default function MarkdownPreview({
                 },
                 thead({ children, ...props }) {
                   return (
-                    <thead className="bg-elevated text-xs font-bold uppercase tracking-wider border-b-2 border-border text-foreground" {...props}>
+                    <thead className="bg-elevated text-[10px] sm:text-xs font-bold uppercase tracking-wider border-b-2 border-border text-foreground" {...props}>
                       {children}
                     </thead>
                   );
                 },
                 th({ children, ...props }) {
                   return (
-                    <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground" {...props}>
+                    <th className="px-2.5 sm:px-4 py-2 sm:py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-foreground" {...props}>
                       {children}
                     </th>
                   );
                 },
                 td({ children, ...props }) {
                   return (
-                    <td className="px-4 py-3 text-sm border-b border-border/50 text-foreground" {...props}>
+                    <td className="px-2.5 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm border-b border-border/50 text-foreground" {...props}>
                       {children}
                     </td>
                   );
@@ -267,7 +283,7 @@ export default function MarkdownPreview({
                 },
                 pre({ children, ...props }) {
                   return (
-                    <pre className="break-inside-avoid shadow-sm overflow-x-auto max-w-full text-xs sm:text-sm" {...props}>
+                    <pre className="break-inside-avoid shadow-sm overflow-x-auto max-w-full text-xs sm:text-sm p-3 sm:p-4" {...props}>
                       {children}
                     </pre>
                   );
