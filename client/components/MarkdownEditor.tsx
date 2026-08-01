@@ -128,24 +128,23 @@ export default function MarkdownEditor({
         </div>
       )}
 
-      {/* Sleek Touch-Friendly Editor Sub-Toolbar */}
-      <div className="flex h-10 items-center justify-between border-b border-border bg-background/50 px-3 md:px-4 text-xs text-muted transition-colors duration-200">
-        <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+      {/* Touch-Friendly & Fully Visible Editor Sub-Toolbar */}
+      <div className="flex h-10 items-center justify-between border-b border-border bg-background/50 px-2 sm:px-4 text-xs text-muted transition-colors duration-200 overflow-x-auto no-scrollbar gap-2 flex-shrink-0">
+        {/* Editor Info & Statistics Badges */}
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           <span className="font-semibold text-foreground flex items-center gap-1 whitespace-nowrap text-[11px] sm:text-xs">
             <svg className="w-3.5 h-3.5 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
-            Editor
+            <span className="hidden xs:inline">Editor</span>
           </span>
           <span className="text-muted-foreground">•</span>
-          <span className="whitespace-nowrap text-[10px] sm:text-xs">{lineCount}L</span>
-          <span className="text-muted-foreground">•</span>
-          <span className="whitespace-nowrap text-[10px] sm:text-xs">{wordCount}W</span>
-          <span className="hidden sm:inline text-muted-foreground">•</span>
-          <span className="hidden sm:inline whitespace-nowrap text-[10px] sm:text-xs">{charCount}C</span>
+          <span className="whitespace-nowrap text-[10px] sm:text-xs bg-elevated/80 px-1.5 py-0.5 rounded border border-border/60">{lineCount}L</span>
+          <span className="whitespace-nowrap text-[10px] sm:text-xs bg-elevated/80 px-1.5 py-0.5 rounded border border-border/60">{wordCount}W</span>
+          <span className="hidden sm:inline-block whitespace-nowrap text-[10px] sm:text-xs bg-elevated/80 px-1.5 py-0.5 rounded border border-border/60">{charCount}C</span>
         </div>
 
-        {/* Clean, Mobile Touch-Friendly Toolbar Actions */}
+        {/* 100% Mobile Visible Action Toolbar */}
         <div className="flex items-center gap-1.5 flex-shrink-0">
           {/* File Upload Button */}
           <FileUpload onUpload={onUpload} onError={onError} />
@@ -165,9 +164,9 @@ export default function MarkdownEditor({
 
           <div className="w-[1px] h-4 bg-border mx-0.5 flex-shrink-0" />
 
-          {/* Compact Icon Utilities Group (Copy & Clear) */}
-          <div className="flex items-center gap-0.5 sm:gap-1 bg-elevated/60 p-0.5 rounded-lg border border-border flex-shrink-0">
-            {/* Compact Copy Icon Button */}
+          {/* Icon Utilities (Copy & Clear) */}
+          <div className="flex items-center gap-0.5 bg-elevated/60 p-0.5 rounded-lg border border-border flex-shrink-0">
+            {/* Copy Button */}
             <button
               type="button"
               onClick={handleCopy}
@@ -177,7 +176,7 @@ export default function MarkdownEditor({
                   ? "text-green-500 bg-green-500/10"
                   : "text-muted hover:text-foreground hover:bg-surface disabled:opacity-30 disabled:cursor-not-allowed"
               }`}
-              title={copied ? "Copied!" : "Copy markdown to clipboard"}
+              title={copied ? "Copied!" : "Copy markdown"}
             >
               {copied ? (
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -190,7 +189,7 @@ export default function MarkdownEditor({
               )}
             </button>
 
-            {/* Compact Clear Icon Button */}
+            {/* Clear Button */}
             <button
               type="button"
               onClick={handleClear}
@@ -206,13 +205,13 @@ export default function MarkdownEditor({
         </div>
       </div>
 
-      {/* Editor textarea - 16px text-base on mobile prevents unwanted Safari/Chrome viewport zoom */}
+      {/* Textarea - 16px font-size on mobile prevents Safari auto-zoom */}
       <textarea
         ref={textareaRef}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Write or paste your markdown content here, or drag & drop a .md file..."
+        placeholder="Write or paste your markdown content here..."
         spellCheck={false}
         autoCapitalize="none"
         autoCorrect="off"

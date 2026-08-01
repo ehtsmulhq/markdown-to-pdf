@@ -127,9 +127,9 @@ export default function Home() {
   };
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground transition-colors duration-200">
-      {/* Premium Dynamic Navbar Header */}
-      <header className="flex h-14 md:h-16 items-center justify-between gap-2 md:gap-4 border-b border-border bg-surface px-3 md:px-6 z-20 transition-colors duration-200">
+    <div className="flex h-screen h-[100dvh] flex-col overflow-hidden bg-background text-foreground transition-colors duration-200">
+      {/* Premium Navbar Header */}
+      <header className="flex h-14 md:h-16 items-center justify-between gap-2 md:gap-4 border-b border-border bg-surface px-2.5 sm:px-4 md:px-6 z-20 transition-colors duration-200 flex-shrink-0">
         {/* Brand Logo & Title */}
         <div className="flex items-center gap-2 md:gap-3 min-w-0">
           <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-xl bg-gradient-to-br from-accent via-indigo-600 to-purple-700 shadow-glow flex-shrink-0 ring-1 ring-white/20">
@@ -148,30 +148,30 @@ export default function Home() {
             </svg>
           </div>
           <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               <span className="text-sm md:text-base font-extrabold tracking-tight text-foreground">MD</span>
               <svg className="w-3 h-3 md:w-3.5 md:h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
-              <span className="bg-accent/15 text-accent border border-accent/30 px-1.5 py-0.5 rounded text-[10px] md:text-[11px] font-black uppercase tracking-wider">
+              <span className="bg-accent/15 text-accent border border-accent/30 px-1 py-0.5 rounded text-[10px] md:text-[11px] font-black uppercase tracking-wider">
                 PDF
               </span>
             </div>
-            <p className="hidden sm:flex items-center gap-1.5 text-[11px] text-muted truncate max-w-[140px] sm:max-w-[200px]" title={filename ? filename : "Markdown Studio"}>
+            <p className="hidden sm:flex items-center gap-1.5 text-[11px] text-muted truncate max-w-[120px] sm:max-w-[200px]" title={filename ? filename : "Markdown Studio"}>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
               <span className="truncate">{filename ? filename : "Markdown Studio"}</span>
             </p>
           </div>
         </div>
 
-        {/* Desktop & Tablet Output Controls */}
+        {/* Header Actions */}
         <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
-          {/* Theme Switcher Segmented Control */}
+          {/* Theme Switcher */}
           <div className="flex items-center p-0.5 rounded-lg border border-border bg-elevated text-xs font-medium flex-shrink-0">
             <button
               type="button"
               onClick={() => handleThemeChange("light")}
-              className={`flex items-center gap-1 px-2 md:px-2.5 py-1 rounded-md transition-all duration-150 whitespace-nowrap active:scale-95 touch-manipulation ${
+              className={`flex items-center gap-1 px-1.5 sm:px-2.5 py-1 rounded-md transition-all duration-150 whitespace-nowrap active:scale-95 touch-manipulation ${
                 themeMode === "light"
                   ? "bg-surface text-foreground shadow-sm font-semibold"
                   : "text-muted hover:text-foreground"
@@ -191,7 +191,7 @@ export default function Home() {
             <button
               type="button"
               onClick={() => handleThemeChange("dark")}
-              className={`flex items-center gap-1 px-2 md:px-2.5 py-1 rounded-md transition-all duration-150 whitespace-nowrap active:scale-95 touch-manipulation ${
+              className={`flex items-center gap-1 px-1.5 sm:px-2.5 py-1 rounded-md transition-all duration-150 whitespace-nowrap active:scale-95 touch-manipulation ${
                 themeMode === "dark"
                   ? "bg-surface text-foreground shadow-sm font-semibold"
                   : "text-muted hover:text-foreground"
@@ -207,7 +207,7 @@ export default function Home() {
             <button
               type="button"
               onClick={() => handleThemeChange("system")}
-              className={`flex items-center gap-1 px-2 md:px-2.5 py-1 rounded-md transition-all duration-150 whitespace-nowrap active:scale-95 touch-manipulation ${
+              className={`flex items-center gap-1 px-1.5 sm:px-2.5 py-1 rounded-md transition-all duration-150 whitespace-nowrap active:scale-95 touch-manipulation ${
                 themeMode === "system"
                   ? "bg-surface text-foreground shadow-sm font-semibold"
                   : "text-muted hover:text-foreground"
@@ -221,7 +221,7 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Font Choice Dropdown (Desktop/Tablet) */}
+          {/* Desktop/Tablet Dropdowns */}
           <div className="hidden md:flex items-center gap-1.5 rounded-lg border border-border bg-elevated px-2.5 py-1.5 text-xs flex-shrink-0">
             <span className="text-muted font-medium whitespace-nowrap">Font:</span>
             <select
@@ -237,7 +237,6 @@ export default function Home() {
             </select>
           </div>
 
-          {/* Page Format Selector (Desktop/Tablet) */}
           <div className="hidden md:flex items-center gap-1.5 rounded-lg border border-border bg-elevated px-2.5 py-1.5 text-xs flex-shrink-0">
             <span className="text-muted font-medium whitespace-nowrap">Page:</span>
             <select
@@ -263,13 +262,13 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Mobile Settings & Viewport Navigation Sub-Toolbar */}
-      <div className="flex md:hidden border-b border-border bg-surface px-3 py-1.5 items-center justify-between gap-2 text-xs flex-shrink-0">
-        {/* Mobile Viewport Segmented Mode Switcher */}
-        <div className="flex items-center p-0.5 rounded-lg border border-border bg-elevated text-xs font-medium flex-1 max-w-[200px]">
+      {/* Mobile Control Strip & Tab Switcher */}
+      <div className="flex md:hidden border-b border-border bg-surface px-2.5 py-1.5 items-center justify-between gap-2 text-xs flex-shrink-0">
+        {/* Mobile Viewport Mode Switcher */}
+        <div className="flex items-center p-0.5 rounded-lg border border-border bg-elevated text-xs font-medium flex-1 max-w-[210px]">
           <button
             onClick={() => setActiveTab("editor")}
-            className={`flex-1 py-1 rounded-md font-medium text-center transition-colors text-[11px] ${
+            className={`flex-1 py-1 rounded-md font-medium text-center transition-colors text-[11px] whitespace-nowrap ${
               activeTab === "editor"
                 ? "bg-surface text-foreground shadow-sm font-semibold"
                 : "text-muted hover:text-foreground"
@@ -279,7 +278,7 @@ export default function Home() {
           </button>
           <button
             onClick={() => setActiveTab("preview")}
-            className={`flex-1 py-1 rounded-md font-medium text-center transition-colors text-[11px] ${
+            className={`flex-1 py-1 rounded-md font-medium text-center transition-colors text-[11px] whitespace-nowrap ${
               activeTab === "preview"
                 ? "bg-surface text-foreground shadow-sm font-semibold"
                 : "text-muted hover:text-foreground"
@@ -289,12 +288,12 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Mobile Compact Settings Dropdowns */}
-        <div className="flex items-center gap-1 flex-shrink-0 text-[11px]">
+        {/* Mobile Settings Controls */}
+        <div className="flex items-center gap-1 flex-shrink-0">
           <select
             value={fontFamily}
             onChange={(e) => setFontFamily(e.target.value as FontFamilyChoice)}
-            className="bg-elevated border border-border rounded px-1.5 py-1 text-foreground focus:outline-none cursor-pointer text-[11px]"
+            className="bg-elevated border border-border rounded px-1.5 py-1 text-foreground focus:outline-none cursor-pointer text-[10px] sm:text-[11px]"
             title="Font Family"
           >
             <option value="sans">Sans</option>
@@ -307,7 +306,7 @@ export default function Home() {
           <select
             value={pageType}
             onChange={(e) => setPageType(e.target.value as "letter" | "a4" | "a3")}
-            className="bg-elevated border border-border rounded px-1.5 py-1 text-foreground focus:outline-none cursor-pointer uppercase text-[11px] font-semibold"
+            className="bg-elevated border border-border rounded px-1 py-1 text-foreground focus:outline-none cursor-pointer uppercase text-[10px] sm:text-[11px] font-semibold"
             title="Page Format"
           >
             <option value="a4">A4</option>
@@ -319,16 +318,16 @@ export default function Home() {
 
       {/* Error Alert */}
       {error && (
-        <div className="flex items-center justify-between border-b border-danger-border bg-danger-bg px-4 py-2 text-xs text-danger animate-fade-in z-10 flex-shrink-0">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between border-b border-danger-border bg-danger-bg px-3 py-2 text-xs text-danger animate-fade-in z-10 flex-shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
             <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>{error}</span>
+            <span className="truncate">{error}</span>
           </div>
           <button
             onClick={() => setError(null)}
-            className="hover:opacity-75 text-danger"
+            className="hover:opacity-75 text-danger ml-2 flex-shrink-0"
           >
             ✕
           </button>
@@ -336,10 +335,10 @@ export default function Home() {
       )}
 
       {/* Main Workspace Grid */}
-      <main className="flex flex-1 overflow-hidden">
+      <main className="flex flex-1 overflow-hidden relative">
         {/* Editor Pane */}
         <section
-          className={`flex flex-1 flex-col border-r border-border ${
+          className={`flex flex-1 flex-col border-r border-border min-w-0 ${
             activeTab === "preview" ? "hidden md:flex" : "flex"
           }`}
         >
@@ -353,7 +352,7 @@ export default function Home() {
 
         {/* Preview Pane */}
         <section
-          className={`flex flex-1 flex-col ${
+          className={`flex flex-1 flex-col min-w-0 ${
             activeTab === "editor" ? "hidden md:flex" : "flex"
           }`}
         >
