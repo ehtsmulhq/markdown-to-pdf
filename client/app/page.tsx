@@ -128,13 +128,13 @@ export default function Home() {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground transition-colors duration-200">
-      {/* Premium Top Header Navbar */}
-      <header className="flex h-16 items-center justify-between gap-4 border-b border-border bg-surface px-4 md:px-6 z-20 transition-colors duration-200">
+      {/* Premium Dynamic Navbar Header */}
+      <header className="flex h-14 md:h-16 items-center justify-between gap-2 md:gap-4 border-b border-border bg-surface px-3 md:px-6 z-20 transition-colors duration-200">
         {/* Brand Logo & Title */}
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-accent via-indigo-600 to-purple-700 shadow-glow flex-shrink-0 ring-1 ring-white/20">
+        <div className="flex items-center gap-2 md:gap-3 min-w-0">
+          <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-xl bg-gradient-to-br from-accent via-indigo-600 to-purple-700 shadow-glow flex-shrink-0 ring-1 ring-white/20">
             <svg
-              className="h-5 w-5 text-white flex-shrink-0"
+              className="h-4 w-4 md:h-5 md:w-5 text-white flex-shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -148,30 +148,30 @@ export default function Home() {
             </svg>
           </div>
           <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="text-base font-extrabold tracking-tight text-foreground">MD</span>
-              <svg className="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm md:text-base font-extrabold tracking-tight text-foreground">MD</span>
+              <svg className="w-3 h-3 md:w-3.5 md:h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
-              <span className="bg-accent/15 text-accent border border-accent/30 px-1.5 py-0.5 rounded text-[11px] font-black uppercase tracking-wider">
+              <span className="bg-accent/15 text-accent border border-accent/30 px-1.5 py-0.5 rounded text-[10px] md:text-[11px] font-black uppercase tracking-wider">
                 PDF
               </span>
             </div>
-            <p className="hidden sm:flex items-center gap-1.5 text-[11px] text-muted truncate max-w-[160px] sm:max-w-[220px]" title={filename ? filename : "Markdown Studio"}>
+            <p className="hidden sm:flex items-center gap-1.5 text-[11px] text-muted truncate max-w-[140px] sm:max-w-[200px]" title={filename ? filename : "Markdown Studio"}>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
               <span className="truncate">{filename ? filename : "Markdown Studio"}</span>
             </p>
           </div>
         </div>
 
-        {/* Output & Global Settings Controls */}
-        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-          {/* Segmented Industry-Grade Theme Switcher */}
+        {/* Desktop & Tablet Output Controls */}
+        <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+          {/* Theme Switcher Segmented Control */}
           <div className="flex items-center p-0.5 rounded-lg border border-border bg-elevated text-xs font-medium flex-shrink-0">
             <button
               type="button"
               onClick={() => handleThemeChange("light")}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition-all duration-150 whitespace-nowrap ${
+              className={`flex items-center gap-1 px-2 md:px-2.5 py-1 rounded-md transition-all duration-150 whitespace-nowrap active:scale-95 touch-manipulation ${
                 themeMode === "light"
                   ? "bg-surface text-foreground shadow-sm font-semibold"
                   : "text-muted hover:text-foreground"
@@ -191,7 +191,7 @@ export default function Home() {
             <button
               type="button"
               onClick={() => handleThemeChange("dark")}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition-all duration-150 whitespace-nowrap ${
+              className={`flex items-center gap-1 px-2 md:px-2.5 py-1 rounded-md transition-all duration-150 whitespace-nowrap active:scale-95 touch-manipulation ${
                 themeMode === "dark"
                   ? "bg-surface text-foreground shadow-sm font-semibold"
                   : "text-muted hover:text-foreground"
@@ -207,7 +207,7 @@ export default function Home() {
             <button
               type="button"
               onClick={() => handleThemeChange("system")}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition-all duration-150 whitespace-nowrap ${
+              className={`flex items-center gap-1 px-2 md:px-2.5 py-1 rounded-md transition-all duration-150 whitespace-nowrap active:scale-95 touch-manipulation ${
                 themeMode === "system"
                   ? "bg-surface text-foreground shadow-sm font-semibold"
                   : "text-muted hover:text-foreground"
@@ -221,8 +221,8 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Font Choice Dropdown */}
-          <div className="hidden sm:flex items-center gap-1.5 rounded-lg border border-border bg-elevated px-2.5 py-1.5 text-xs flex-shrink-0">
+          {/* Font Choice Dropdown (Desktop/Tablet) */}
+          <div className="hidden md:flex items-center gap-1.5 rounded-lg border border-border bg-elevated px-2.5 py-1.5 text-xs flex-shrink-0">
             <span className="text-muted font-medium whitespace-nowrap">Font:</span>
             <select
               value={fontFamily}
@@ -237,8 +237,8 @@ export default function Home() {
             </select>
           </div>
 
-          {/* Page Format Selector Dropdown */}
-          <div className="hidden sm:flex items-center gap-1.5 rounded-lg border border-border bg-elevated px-2.5 py-1.5 text-xs flex-shrink-0">
+          {/* Page Format Selector (Desktop/Tablet) */}
+          <div className="hidden md:flex items-center gap-1.5 rounded-lg border border-border bg-elevated px-2.5 py-1.5 text-xs flex-shrink-0">
             <span className="text-muted font-medium whitespace-nowrap">Page:</span>
             <select
               value={pageType}
@@ -263,28 +263,58 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Mobile Tab Switcher */}
-      <div className="flex md:hidden border-b border-border bg-surface px-4 py-1.5 justify-around text-xs flex-shrink-0">
-        <button
-          onClick={() => setActiveTab("editor")}
-          className={`flex-1 py-1.5 rounded-md font-medium text-center transition-colors ${
-            activeTab === "editor"
-              ? "bg-elevated text-accent border border-border"
-              : "text-muted hover:text-foreground"
-          }`}
-        >
-          Editor
-        </button>
-        <button
-          onClick={() => setActiveTab("preview")}
-          className={`flex-1 py-1.5 rounded-md font-medium text-center transition-colors ${
-            activeTab === "preview"
-              ? "bg-elevated text-accent border border-border"
-              : "text-muted hover:text-foreground"
-          }`}
-        >
-          Preview
-        </button>
+      {/* Mobile Settings & Viewport Navigation Sub-Toolbar */}
+      <div className="flex md:hidden border-b border-border bg-surface px-3 py-1.5 items-center justify-between gap-2 text-xs flex-shrink-0">
+        {/* Mobile Viewport Segmented Mode Switcher */}
+        <div className="flex items-center p-0.5 rounded-lg border border-border bg-elevated text-xs font-medium flex-1 max-w-[200px]">
+          <button
+            onClick={() => setActiveTab("editor")}
+            className={`flex-1 py-1 rounded-md font-medium text-center transition-colors text-[11px] ${
+              activeTab === "editor"
+                ? "bg-surface text-foreground shadow-sm font-semibold"
+                : "text-muted hover:text-foreground"
+            }`}
+          >
+            ✏️ Editor
+          </button>
+          <button
+            onClick={() => setActiveTab("preview")}
+            className={`flex-1 py-1 rounded-md font-medium text-center transition-colors text-[11px] ${
+              activeTab === "preview"
+                ? "bg-surface text-foreground shadow-sm font-semibold"
+                : "text-muted hover:text-foreground"
+            }`}
+          >
+            👁️ Preview
+          </button>
+        </div>
+
+        {/* Mobile Compact Settings Dropdowns */}
+        <div className="flex items-center gap-1 flex-shrink-0 text-[11px]">
+          <select
+            value={fontFamily}
+            onChange={(e) => setFontFamily(e.target.value as FontFamilyChoice)}
+            className="bg-elevated border border-border rounded px-1.5 py-1 text-foreground focus:outline-none cursor-pointer text-[11px]"
+            title="Font Family"
+          >
+            <option value="sans">Sans</option>
+            <option value="serif">Serif</option>
+            <option value="mono">Mono</option>
+            <option value="garamond">Garamond</option>
+            <option value="modern">Modern</option>
+          </select>
+
+          <select
+            value={pageType}
+            onChange={(e) => setPageType(e.target.value as "letter" | "a4" | "a3")}
+            className="bg-elevated border border-border rounded px-1.5 py-1 text-foreground focus:outline-none cursor-pointer uppercase text-[11px] font-semibold"
+            title="Page Format"
+          >
+            <option value="a4">A4</option>
+            <option value="letter">Letter</option>
+            <option value="a3">A3</option>
+          </select>
+        </div>
       </div>
 
       {/* Error Alert */}

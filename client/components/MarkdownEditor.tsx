@@ -128,24 +128,24 @@ export default function MarkdownEditor({
         </div>
       )}
 
-      {/* Sleek Minimal Editor sub-toolbar */}
-      <div className="flex h-10 items-center justify-between border-b border-border bg-background/50 px-4 text-xs text-muted transition-colors duration-200">
-        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-          <span className="font-semibold text-foreground flex items-center gap-1.5 whitespace-nowrap">
+      {/* Sleek Touch-Friendly Editor Sub-Toolbar */}
+      <div className="flex h-10 items-center justify-between border-b border-border bg-background/50 px-3 md:px-4 text-xs text-muted transition-colors duration-200">
+        <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+          <span className="font-semibold text-foreground flex items-center gap-1 whitespace-nowrap text-[11px] sm:text-xs">
             <svg className="w-3.5 h-3.5 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
             Editor
           </span>
+          <span className="text-muted-foreground">•</span>
+          <span className="whitespace-nowrap text-[10px] sm:text-xs">{lineCount}L</span>
+          <span className="text-muted-foreground">•</span>
+          <span className="whitespace-nowrap text-[10px] sm:text-xs">{wordCount}W</span>
           <span className="hidden sm:inline text-muted-foreground">•</span>
-          <span className="hidden sm:inline whitespace-nowrap">{lineCount} lines</span>
-          <span className="hidden sm:inline text-muted-foreground">•</span>
-          <span className="hidden sm:inline whitespace-nowrap">{wordCount} words</span>
-          <span className="hidden sm:inline text-muted-foreground">•</span>
-          <span className="hidden sm:inline whitespace-nowrap">{charCount} chars</span>
+          <span className="hidden sm:inline whitespace-nowrap text-[10px] sm:text-xs">{charCount}C</span>
         </div>
 
-        {/* Clean, un-cluttered toolbar actions */}
+        {/* Clean, Mobile Touch-Friendly Toolbar Actions */}
         <div className="flex items-center gap-1.5 flex-shrink-0">
           {/* File Upload Button */}
           <FileUpload onUpload={onUpload} onError={onError} />
@@ -154,25 +154,25 @@ export default function MarkdownEditor({
           <button
             type="button"
             onClick={handleInsertPageBreak}
-            className="flex-shrink-0 whitespace-nowrap h-7 flex items-center gap-1 hover:text-foreground transition-colors px-2.5 py-1 rounded bg-accent/10 border border-accent/30 text-accent text-[11px] font-medium"
+            className="flex-shrink-0 whitespace-nowrap h-7 flex items-center gap-1 hover:text-foreground active:scale-95 touch-manipulation transition-all px-2 sm:px-2.5 py-1 rounded bg-accent/10 border border-accent/30 text-accent text-[10px] sm:text-[11px] font-medium"
             title="Insert a manual page break tag"
           >
             <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
-            <span>+ Page Break</span>
+            <span>+ Break</span>
           </button>
 
           <div className="w-[1px] h-4 bg-border mx-0.5 flex-shrink-0" />
 
           {/* Compact Icon Utilities Group (Copy & Clear) */}
-          <div className="flex items-center gap-1 bg-elevated/60 p-0.5 rounded-lg border border-border flex-shrink-0">
+          <div className="flex items-center gap-0.5 sm:gap-1 bg-elevated/60 p-0.5 rounded-lg border border-border flex-shrink-0">
             {/* Compact Copy Icon Button */}
             <button
               type="button"
               onClick={handleCopy}
               disabled={!value}
-              className={`h-6 w-6 flex items-center justify-center rounded transition-colors ${
+              className={`h-6 w-6 flex items-center justify-center rounded transition-colors active:scale-95 touch-manipulation ${
                 copied
                   ? "text-green-500 bg-green-500/10"
                   : "text-muted hover:text-foreground hover:bg-surface disabled:opacity-30 disabled:cursor-not-allowed"
@@ -195,7 +195,7 @@ export default function MarkdownEditor({
               type="button"
               onClick={handleClear}
               disabled={!value}
-              className="h-6 w-6 flex items-center justify-center rounded text-muted hover:text-danger hover:bg-danger-bg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="h-6 w-6 flex items-center justify-center rounded text-muted hover:text-danger hover:bg-danger-bg disabled:opacity-30 disabled:cursor-not-allowed transition-colors active:scale-95 touch-manipulation"
               title="Clear editor canvas"
             >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -206,7 +206,7 @@ export default function MarkdownEditor({
         </div>
       </div>
 
-      {/* Editor textarea */}
+      {/* Editor textarea - 16px text-base on mobile prevents unwanted Safari/Chrome viewport zoom */}
       <textarea
         ref={textareaRef}
         value={value}
@@ -214,7 +214,9 @@ export default function MarkdownEditor({
         onKeyDown={handleKeyDown}
         placeholder="Write or paste your markdown content here, or drag & drop a .md file..."
         spellCheck={false}
-        className="flex-1 w-full resize-none bg-surface p-4 font-mono text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/60 focus:outline-none selection:bg-accent/30 selection:text-foreground transition-colors duration-200"
+        autoCapitalize="none"
+        autoCorrect="off"
+        className="flex-1 w-full resize-none bg-surface p-3 sm:p-4 font-mono text-base sm:text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/60 focus:outline-none selection:bg-accent/30 selection:text-foreground transition-colors duration-200"
       />
     </div>
   );
