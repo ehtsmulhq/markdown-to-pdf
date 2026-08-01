@@ -137,6 +137,7 @@ export default function Home() {
       <header className="flex h-16 items-center justify-between gap-4 border-b border-border bg-surface px-4 md:px-6 z-20 transition-colors duration-200">
         {/* Brand Logo & Title */}
         <div className="flex items-center gap-3 min-w-0">
+          {/* Logo Icon Badge (Always visible on mobile & desktop) */}
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-accent via-indigo-600 to-purple-700 shadow-glow flex-shrink-0 ring-1 ring-white/20">
             <svg
               className="h-5 w-5 text-white flex-shrink-0"
@@ -152,7 +153,9 @@ export default function Home() {
               />
             </svg>
           </div>
-          <div className="min-w-0">
+
+          {/* Brand Text (Hidden on mobile, visible on desktop/tablet) */}
+          <div className="hidden sm:block min-w-0">
             <div className="flex items-center gap-2">
               <span className="text-base font-extrabold tracking-tight text-foreground">MD</span>
               <svg className="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -162,7 +165,7 @@ export default function Home() {
                 PDF
               </span>
             </div>
-            <p className="hidden sm:flex items-center gap-1.5 text-[11px] text-muted truncate max-w-[160px] sm:max-w-[220px]" title={filename ? filename : "Markdown Studio"}>
+            <p className="flex items-center gap-1.5 text-[11px] text-muted truncate max-w-[160px] sm:max-w-[220px]" title={filename ? filename : "Markdown Studio"}>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
               <span className="truncate">{filename ? filename : "Markdown Studio"}</span>
             </p>
