@@ -50,6 +50,7 @@ export default function MarkdownPreview({
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [showPageGuides, setShowPageGuides] = useState(true);
+  const [isMobileScreen, setIsMobileScreen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -69,6 +70,15 @@ export default function MarkdownPreview({
     const pages = Math.ceil(contentHeight / spec.printableHeight);
     setTotalPages(Math.max(pages, 1));
   };
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobileScreen(window.innerWidth < 640);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   useEffect(() => {
     recalculatePageCount();
@@ -165,19 +175,19 @@ export default function MarkdownPreview({
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center bg-background relative transition-colors duration-200"
+        className="flex-1 overflow-y-auto p-2 sm:p-4 md:p-8 flex justify-center bg-background relative transition-colors duration-200"
       >
         <div 
           style={{ maxWidth: `${spec.width}px` }} 
-          className="w-full relative transition-all duration-300"
+          className="w-full relative transition-all duration-300 max-w-full overflow-hidden"
         >
           <div
             ref={contentRef}
             style={{
-              padding: `${spec.marginVert}px`,
+              padding: isMobileScreen ? "1.25rem 0.85rem" : `${spec.marginVert}px`,
               fontFamily: selectedFontStack,
             }}
-            className={`min-h-[750px] rounded-xl shadow-paper border transition-all duration-200 relative text-[11pt] leading-[1.6] ${
+            className={`min-h-[600px] sm:min-h-[750px] rounded-xl shadow-paper border transition-all duration-200 relative text-[10pt] sm:text-[11pt] leading-[1.6] max-w-full overflow-x-hidden ${
               isDark
                 ? "bg-surface text-foreground border-border prose prose-invert max-w-none prose-headings:font-semibold prose-headings:text-foreground prose-a:text-accent prose-code:rounded prose-code:bg-elevated prose-code:px-1.5 prose-code:py-0.5 prose-code:before:content-none prose-code:after:content-none prose-pre:bg-elevated prose-blockquote:border-l-accent"
                 : "bg-white text-slate-900 border-slate-200 prose prose-slate max-w-none prose-headings:font-semibold prose-headings:text-slate-900 prose-a:text-indigo-600 prose-code:rounded prose-code:bg-slate-100 prose-code:text-slate-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:before:content-none prose-code:after:content-none prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-blockquote:border-l-indigo-500"
@@ -220,7 +230,7 @@ export default function MarkdownPreview({
                 },
                 table({ children, ...props }) {
                   return (
-                    <div className="overflow-x-auto my-6 rounded-lg border border-border/80 shadow-sm break-inside-avoid">
+                    <div className="overflow-x-auto my-6 rounded-lg border border-border/80 shadow-sm break-inside-avoid max-w-full">
                       <table className="w-full border-collapse text-left text-sm" {...props}>
                         {children}
                       </table>
@@ -257,7 +267,7 @@ export default function MarkdownPreview({
                 },
                 pre({ children, ...props }) {
                   return (
-                    <pre className="break-inside-avoid shadow-sm" {...props}>
+                    <pre className="break-inside-avoid shadow-sm overflow-x-auto max-w-full text-xs sm:text-sm" {...props}>
                       {children}
                     </pre>
                   );
