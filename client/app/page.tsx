@@ -92,6 +92,11 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    // Auto-detect mobile screen on load so mobile defaults cleanly to Editor single pane
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      setActiveTab("editor");
+    }
+
     const savedTheme = localStorage.getItem("theme_mode") as ThemeMode | null;
     const initialMode: ThemeMode = savedTheme || "system";
     setThemeMode(initialMode);
@@ -310,7 +315,7 @@ export default function Home() {
         {/* Editor Pane */}
         <section
           className={`flex flex-1 flex-col border-r border-border ${
-            activeTab === "preview" ? "hidden md:flex" : "flex"
+            activeTab === "preview" || (activeTab === "split" && "hidden md:flex") ? "hidden md:flex" : "flex"
           }`}
         >
           <MarkdownEditor
@@ -324,7 +329,7 @@ export default function Home() {
         {/* Preview Pane */}
         <section
           className={`flex flex-1 flex-col ${
-            activeTab === "editor" ? "hidden md:flex" : "flex"
+            activeTab === "editor" || (activeTab === "split" && "hidden md:flex") ? "hidden md:flex" : "flex"
           }`}
         >
           <MarkdownPreview
