@@ -128,23 +128,24 @@ export default function MarkdownEditor({
         </div>
       )}
 
-      {/* Touch-Friendly & Fully Visible Editor Sub-Toolbar */}
-      <div className="flex h-10 items-center justify-between border-b border-border bg-background/50 px-2 sm:px-4 text-xs text-muted transition-colors duration-200 overflow-x-auto no-scrollbar gap-2 flex-shrink-0">
-        {/* Editor Info & Statistics Badges */}
-        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-          <span className="font-semibold text-foreground flex items-center gap-1 whitespace-nowrap text-[11px] sm:text-xs">
+      {/* Sleek Minimal Editor sub-toolbar */}
+      <div className="flex h-10 items-center justify-between border-b border-border bg-background/50 px-4 text-xs text-muted transition-colors duration-200">
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <span className="font-semibold text-foreground flex items-center gap-1.5 whitespace-nowrap">
             <svg className="w-3.5 h-3.5 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
-            <span className="hidden xs:inline">Editor</span>
+            Editor
           </span>
-          <span className="text-muted-foreground">•</span>
-          <span className="whitespace-nowrap text-[10px] sm:text-xs bg-elevated/80 px-1.5 py-0.5 rounded border border-border/60">{lineCount}L</span>
-          <span className="whitespace-nowrap text-[10px] sm:text-xs bg-elevated/80 px-1.5 py-0.5 rounded border border-border/60">{wordCount}W</span>
-          <span className="hidden sm:inline-block whitespace-nowrap text-[10px] sm:text-xs bg-elevated/80 px-1.5 py-0.5 rounded border border-border/60">{charCount}C</span>
+          <span className="hidden sm:inline text-muted-foreground">•</span>
+          <span className="hidden sm:inline whitespace-nowrap">{lineCount} lines</span>
+          <span className="hidden sm:inline text-muted-foreground">•</span>
+          <span className="hidden sm:inline whitespace-nowrap">{wordCount} words</span>
+          <span className="hidden sm:inline text-muted-foreground">•</span>
+          <span className="hidden sm:inline whitespace-nowrap">{charCount} chars</span>
         </div>
 
-        {/* 100% Mobile Visible Action Toolbar */}
+        {/* Clean, un-cluttered toolbar actions */}
         <div className="flex items-center gap-1.5 flex-shrink-0">
           {/* File Upload Button */}
           <FileUpload onUpload={onUpload} onError={onError} />
@@ -153,30 +154,30 @@ export default function MarkdownEditor({
           <button
             type="button"
             onClick={handleInsertPageBreak}
-            className="flex-shrink-0 whitespace-nowrap h-7 flex items-center gap-1 hover:text-foreground active:scale-95 touch-manipulation transition-all px-2 sm:px-2.5 py-1 rounded bg-accent/10 border border-accent/30 text-accent text-[10px] sm:text-[11px] font-medium"
+            className="flex-shrink-0 whitespace-nowrap h-7 flex items-center gap-1 hover:text-foreground transition-colors px-2.5 py-1 rounded bg-accent/10 border border-accent/30 text-accent text-[11px] font-medium"
             title="Insert a manual page break tag"
           >
             <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
-            <span>+ Break</span>
+            <span>+ Page Break</span>
           </button>
 
           <div className="w-[1px] h-4 bg-border mx-0.5 flex-shrink-0" />
 
-          {/* Icon Utilities (Copy & Clear) */}
-          <div className="flex items-center gap-0.5 bg-elevated/60 p-0.5 rounded-lg border border-border flex-shrink-0">
-            {/* Copy Button */}
+          {/* Compact Icon Utilities Group (Copy & Clear) */}
+          <div className="flex items-center gap-1 bg-elevated/60 p-0.5 rounded-lg border border-border flex-shrink-0">
+            {/* Compact Copy Icon Button */}
             <button
               type="button"
               onClick={handleCopy}
               disabled={!value}
-              className={`h-6 w-6 flex items-center justify-center rounded transition-colors active:scale-95 touch-manipulation ${
+              className={`h-6 w-6 flex items-center justify-center rounded transition-colors ${
                 copied
                   ? "text-green-500 bg-green-500/10"
                   : "text-muted hover:text-foreground hover:bg-surface disabled:opacity-30 disabled:cursor-not-allowed"
               }`}
-              title={copied ? "Copied!" : "Copy markdown"}
+              title={copied ? "Copied!" : "Copy markdown to clipboard"}
             >
               {copied ? (
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -189,12 +190,12 @@ export default function MarkdownEditor({
               )}
             </button>
 
-            {/* Clear Button */}
+            {/* Compact Clear Icon Button */}
             <button
               type="button"
               onClick={handleClear}
               disabled={!value}
-              className="h-6 w-6 flex items-center justify-center rounded text-muted hover:text-danger hover:bg-danger-bg disabled:opacity-30 disabled:cursor-not-allowed transition-colors active:scale-95 touch-manipulation"
+              className="h-6 w-6 flex items-center justify-center rounded text-muted hover:text-danger hover:bg-danger-bg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               title="Clear editor canvas"
             >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -205,17 +206,15 @@ export default function MarkdownEditor({
         </div>
       </div>
 
-      {/* Textarea - 16px font-size on mobile prevents Safari auto-zoom */}
+      {/* Editor textarea */}
       <textarea
         ref={textareaRef}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Write or paste your markdown content here..."
+        placeholder="Write or paste your markdown content here, or drag & drop a .md file..."
         spellCheck={false}
-        autoCapitalize="none"
-        autoCorrect="off"
-        className="flex-1 w-full resize-none bg-surface p-3 sm:p-4 font-mono text-base sm:text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/60 focus:outline-none selection:bg-accent/30 selection:text-foreground transition-colors duration-200"
+        className="flex-1 w-full resize-none bg-surface p-4 font-mono text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/60 focus:outline-none selection:bg-accent/30 selection:text-foreground transition-colors duration-200"
       />
     </div>
   );
