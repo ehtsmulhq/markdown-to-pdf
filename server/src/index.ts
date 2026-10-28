@@ -1,6 +1,7 @@
 import cors from "cors";
 import express from "express";
 import convertRouter from "./routes/convert.js";
+import previewRouter from "./routes/preview.js";
 import { closeBrowser } from "./services/pdf.js";
 
 const app = express();
@@ -27,7 +28,8 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
-// Conversion router
+// Preview & conversion routers
+app.use("/api/preview", previewRouter);
 app.use("/api/convert", convertRouter);
 
 // 404 Fallback JSON Handler

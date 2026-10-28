@@ -1,70 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { type FontFamilyChoice } from "@/lib/api";
-import type { Plugin } from "unified";
-import type { Root, Node, Parent } from "mdast";
-
-const remarkPageBreak: Plugin<[], Root> = () => {
-  return (tree: Root) => {
-    const PAGE_BREAK_REGEX =
-      /^(<!--\s*page\s*break\s*-->|<!--\s*pagebreak\s*-->|\\pagebreak|\[\[pagebreak\]\]|<div\s+class=["']page-break(-tag)?["']\s*>\s*<\/div>)$/i;
-
-    function visit(node: Node, index: number | undefined, parent: Parent | undefined) {
-      if (!parent || index === undefined) {
-        if ("children" in node && Array.isArray((node as Parent).children)) {
-          const p = node as Parent;
-          for (let i = 0; i < p.children.length; i++) {
-            visit(p.children[i], i, p);
-          }
-        }
-        return;
-      }
-
-      if (node.type === "paragraph" && "children" in node) {
-        const pNode = node as Parent;
-        if (pNode.children.length === 1 && pNode.children[0].type === "text") {
-          const textNode = pNode.children[0] as { type: "text"; value: string };
-          if (PAGE_BREAK_REGEX.test(textNode.value.trim())) {
-            parent.children[index] = {
-              type: "pageBreak" as any,
-              data: {
-                hName: "div",
-                hProperties: { className: "page-break-tag" },
-              },
-            } as any;
-            return;
-          }
-        }
-      }
-
-      if (node.type === "html" && "value" in node) {
-        const htmlNode = node as { type: "html"; value: string };
-        if (PAGE_BREAK_REGEX.test(htmlNode.value.trim())) {
-          parent.children[index] = {
-            type: "pageBreak" as any,
-            data: {
-              hName: "div",
-              hProperties: { className: "page-break-tag" },
-            },
-          } as any;
-          return;
-        }
-      }
-
-      if ("children" in node && Array.isArray((node as Parent).children)) {
-        const p = node as Parent;
-        for (let i = 0; i < p.children.length; i++) {
-          visit(p.children[i], i, p);
-        }
-      }
-    }
-
-    visit(tree, undefined, undefined);
-  };
-};
+import { usePreview } from "@/lib/hooks/usePreview";
 
 interface MarkdownPreviewProps {
   content: string;
@@ -72,14 +10,6 @@ interface MarkdownPreviewProps {
   fontFamily?: FontFamilyChoice;
   isDark?: boolean;
 }
-
-const FONT_MAP: Record<FontFamilyChoice, string> = {
-  sans: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-  serif: 'Georgia, Cambria, "Times New Roman", Times, serif',
-  mono: '"JetBrains Mono", "SF Mono", Consolas, "Courier New", monospace',
-  garamond: 'Garamond, "EB Garamond", "Baskerville", Georgia, serif',
-  modern: '"Inter", "Roboto", "Helvetica Neue", Arial, sans-serif',
-};
 
 const PAGE_SPECS = {
   letter: {
@@ -112,30 +42,60 @@ export default function MarkdownPreview({
   const [totalPages, setTotalPages] = useState(1);
   const [showPageGuides, setShowPageGuides] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const spec = PAGE_SPECS[pageType];
-  const selectedFontStack = FONT_MAP[fontFamily] || FONT_MAP.sans;
+  const { html, loading } = usePreview(content, fontFamily);
 
   const recalculatePageCount = () => {
-    if (!contentRef.current) return;
-    const contentHeight = contentRef.current.scrollHeight - spec.marginVert * 2;
-    const pages = Math.ceil(contentHeight / spec.printableHeight);
-    setTotalPages(Math.max(pages, 1));
+    if (!iframeRef.current || !iframeRef.current.contentDocument) return;
+    try {
+      const doc = iframeRef.current.contentDocument;
+      const height = Math.max(doc.body?.scrollHeight || 0, doc.documentElement?.scrollHeight || 0);
+      if (height > 0) {
+        iframeRef.current.style.height = `${height + 40}px`;
+        const pages = Math.ceil((height - spec.marginVert * 2) / spec.printableHeight);
+        setTotalPages(Math.max(pages, 1));
+      }
+    } catch {
+      // In case of any cross-origin sandboxing catch
+    }
   };
 
   useEffect(() => {
-    recalculatePageCount();
+    if (!iframeRef.current) return;
+    const iframe = iframeRef.current;
 
-    const images = contentRef.current?.querySelectorAll("img");
-    if (images && images.length > 0) {
-      images.forEach((img) => {
-        if (!img.complete) {
-          img.addEventListener("load", recalculatePageCount, { once: true });
+    const handleIframeLoad = () => {
+      recalculatePageCount();
+      // inject theme preference styling if dark mode is active
+      try {
+        const doc = iframe.contentDocument;
+        if (doc && doc.body) {
+          if (isDark) {
+            doc.body.style.filter = "invert(0.9) hue-rotate(180deg)";
+            const imgs = doc.querySelectorAll("img, pre, svg");
+            imgs.forEach((el) => {
+              (el as HTMLElement).style.filter = "invert(1) hue-rotate(180deg)";
+            });
+          } else {
+            doc.body.style.filter = "none";
+          }
         }
-      });
-    }
-  }, [content, pageType, fontFamily, spec.marginVert, spec.printableHeight]);
+      } catch {
+        // safe sandbox
+      }
+    };
+
+    iframe.addEventListener("load", handleIframeLoad);
+    // Also trigger shortly after html updates
+    const timer = setTimeout(handleIframeLoad, 100);
+
+    return () => {
+      iframe.removeEventListener("load", handleIframeLoad);
+      clearTimeout(timer);
+    };
+  }, [html, isDark, pageType, fontFamily, spec.marginVert, spec.printableHeight]);
 
   const handleScroll = () => {
     if (scrollRef.current) {
@@ -165,7 +125,7 @@ export default function MarkdownPreview({
           </div>
           <h3 className="text-base font-semibold text-foreground mb-1">Live PDF Preview</h3>
           <p className="text-xs text-muted max-w-xs">
-            Start typing markdown or upload a file to preview your rendered document with accurate page breaks.
+            Start typing markdown or upload a file to preview your rendered document with 100% server-accurate layout.
           </p>
         </div>
       </div>
@@ -182,8 +142,11 @@ export default function MarkdownPreview({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
-            PDF Preview
+            Server Proof
           </span>
+          {loading && (
+            <span className="text-[10px] text-accent animate-pulse">Rendering...</span>
+          )}
           <span className="text-muted-foreground">•</span>
           <span className="text-foreground font-medium text-[11px] sm:text-xs">
             Page {currentPage} of {totalPages}
@@ -221,23 +184,17 @@ export default function MarkdownPreview({
         onScroll={handleScroll}
         className="flex-1 overflow-y-auto p-2 sm:p-4 md:p-8 flex justify-center bg-background relative transition-colors duration-200 w-full min-w-0"
       >
-        {/* Paper Container - Fluid 100% Responsive on Mobile, Max Spec Width on Desktop */}
+        {/* Paper Container */}
         <div 
           style={{ maxWidth: `${spec.width}px` }} 
           className="w-full relative transition-all duration-200 min-w-0"
         >
           <div
-            ref={contentRef}
-            style={{
-              fontFamily: selectedFontStack,
-            }}
-            className={`min-h-[500px] sm:min-h-[750px] rounded-xl shadow-paper border transition-all duration-200 relative text-[10pt] sm:text-[11pt] leading-[1.6] w-full min-w-0 box-border p-4 sm:p-8 md:p-12 ${
-              isDark
-                ? "bg-surface text-foreground border-border prose prose-invert max-w-none prose-headings:font-semibold prose-headings:text-foreground prose-a:text-accent prose-code:rounded prose-code:bg-elevated prose-code:px-1.5 prose-code:py-0.5 prose-code:before:content-none prose-code:after:content-none prose-pre:bg-elevated prose-blockquote:border-l-accent"
-                : "bg-white text-slate-900 border-slate-200 prose prose-slate max-w-none prose-headings:font-semibold prose-headings:text-slate-900 prose-a:text-indigo-600 prose-code:rounded prose-code:bg-slate-100 prose-code:text-slate-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:before:content-none prose-code:after:content-none prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-blockquote:border-l-indigo-500"
+            className={`min-h-[500px] sm:min-h-[750px] rounded-xl shadow-paper border transition-all duration-200 relative w-full min-w-0 box-border overflow-hidden ${
+              isDark ? "bg-surface border-border" : "bg-white border-slate-200"
             }`}
           >
-            {/* Clean Mathematical Page Break Guidelines Overlay */}
+            {/* Mathematical Page Break Guidelines Overlay */}
             {showPageGuides &&
               pageBreakLines.map((topPx, idx) => (
                 <div
@@ -253,85 +210,15 @@ export default function MarkdownPreview({
                 </div>
               ))}
 
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm, remarkPageBreak]}
-              components={{
-                div({ className, children, ...props }) {
-                  if (className === "page-break-tag" || className === "page-break") {
-                    return (
-                      <div
-                        className="my-6 sm:my-8 py-2 border-y border-dashed border-indigo-500/60 bg-indigo-500/10 rounded flex items-center justify-center gap-2 text-indigo-500 font-semibold text-[10px] sm:text-[11px] uppercase tracking-wider select-none"
-                        {...props}
-                      >
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
-                        <span>Manual Page Break</span>
-                      </div>
-                    );
-                  }
-                  return <div className={className} {...props}>{children}</div>;
-                },
-                table({ children, ...props }) {
-                  return (
-                    <div className="overflow-x-auto my-4 sm:my-6 rounded-lg border border-border/80 shadow-sm break-inside-avoid max-w-full w-full">
-                      <table className="w-full border-collapse text-left text-xs sm:text-sm" {...props}>
-                        {children}
-                      </table>
-                    </div>
-                  );
-                },
-                thead({ children, ...props }) {
-                  return (
-                    <thead className="bg-elevated text-[10px] sm:text-xs font-bold uppercase tracking-wider border-b-2 border-border text-foreground" {...props}>
-                      {children}
-                    </thead>
-                  );
-                },
-                th({ children, ...props }) {
-                  return (
-                    <th className="px-2.5 sm:px-4 py-2 sm:py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-foreground" {...props}>
-                      {children}
-                    </th>
-                  );
-                },
-                td({ children, ...props }) {
-                  return (
-                    <td className="px-2.5 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm border-b border-border/50 text-foreground" {...props}>
-                      {children}
-                    </td>
-                  );
-                },
-                tr({ children, ...props }) {
-                  return (
-                    <tr className="hover:bg-elevated/40 transition-colors odd:bg-transparent even:bg-elevated/20" {...props}>
-                      {children}
-                    </tr>
-                  );
-                },
-                pre({ children, ...props }) {
-                  return (
-                    <pre className="break-inside-avoid shadow-sm overflow-x-auto max-w-full text-xs sm:text-sm p-3 sm:p-4 rounded-lg" {...props}>
-                      {children}
-                    </pre>
-                  );
-                },
-                img({ src, alt, ...props }) {
-                  return (
-                    <span className="block my-4 text-center break-inside-avoid">
-                      <img
-                        src={src}
-                        alt={alt}
-                        className="max-w-full h-auto inline-block rounded-lg border border-border shadow-sm"
-                        {...props}
-                      />
-                    </span>
-                  );
-                },
-              }}
-            >
-              {content}
-            </ReactMarkdown>
+            {/* Sandboxed Server-rendered HTML Iframe */}
+            <iframe
+              ref={iframeRef}
+              srcDoc={html}
+              title="Proof Preview"
+              sandbox="allow-same-origin"
+              className="w-full border-0 block"
+              style={{ minHeight: "750px", overflow: "hidden" }}
+            />
           </div>
         </div>
       </div>
