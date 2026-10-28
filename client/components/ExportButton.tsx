@@ -8,7 +8,28 @@ interface ExportButtonProps {
   filename?: string;
   pageType: "letter" | "a4" | "a3";
   fontFamily?: FontFamilyChoice;
-  onError: (message: string) => void;
+  onError?: (message: string) => void;
+  onStatusChange?: (status: "idle" | "loading" | "success" | "error", filename?: string, error?: string) => void;
+}
+
+export function getCleanExportFilename(markdown: string, providedFilename?: string): string {
+  if (providedFilename && providedFilename.trim()) {
+    return providedFilename.replace(/\.(md|markdown)$/i, ".pdf");
+  }
+
+  // Extract from first # Heading
+  const headingMatch = markdown.match(/^#\s+(.+)$/m);
+  if (headingMatch && headingMatch[1]) {
+    const slug = headingMatch[1]
+      .trim()
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .slice(0, 50);
+    if (slug) return `${slug}.pdf`;
+  }
+
+  return "document.pdf";
 }
 
 export default function ExportButton({
@@ -17,6 +38,7 @@ export default function ExportButton({
   pageType,
   fontFamily = "sans",
   onError,
+  onStatusChange,
 }: ExportButtonProps) {
   const [loading, setLoading] = useState(false);
   const isEmpty = !markdown.trim();
@@ -25,14 +47,17 @@ export default function ExportButton({
     if (isEmpty || loading) return;
 
     setLoading(true);
+    const targetFilename = getCleanExportFilename(markdown, filename);
+    onStatusChange?.("loading", targetFilename);
+
     try {
       const blob = await convertToPdf(markdown, pageType, fontFamily);
-      const pdfName = filename
-        ? filename.replace(/\.(md|markdown)$/i, ".pdf")
-        : "document.pdf";
-      downloadBlob(blob, pdfName);
+      downloadBlob(blob, targetFilename);
+      onStatusChange?.("success", targetFilename);
     } catch (error) {
-      onError(error instanceof Error ? error.message : "Export failed");
+      const msg = error instanceof Error ? error.message : "Export failed";
+      onError?.(msg);
+      onStatusChange?.("error", targetFilename, msg);
     } finally {
       setLoading(false);
     }
@@ -67,7 +92,7 @@ export default function ExportButton({
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
             />
           </svg>
-          <span>Exporting...</span>
+          <span>Typesetting...</span>
         </>
       ) : (
         <>
@@ -85,7 +110,7 @@ export default function ExportButton({
               d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
             />
           </svg>
-          <span>Export PDF</span>
+          <span>Export Proof</span>
         </>
       )}
     </button>

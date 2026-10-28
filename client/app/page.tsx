@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import ExportButton from "@/components/ExportButton";
+import ExportToast, { type ExportToastProps } from "@/components/ExportToast";
 import MarkdownEditor from "@/components/MarkdownEditor";
 import MarkdownPreview from "@/components/MarkdownPreview";
 import { type FontFamilyChoice } from "@/lib/api";
@@ -74,6 +75,14 @@ export default function Home() {
 
   const [themeMode, setThemeMode] = useState<ThemeMode>("system");
   const [effectiveTheme, setEffectiveTheme] = useState<"light" | "dark">("dark");
+
+  const [toastState, setToastState] = useState<{
+    status: ExportToastProps["status"];
+    filename?: string;
+    error?: string;
+  }>({
+    status: "idle",
+  });
 
   const applyTheme = useCallback((mode: ThemeMode) => {
     let isDark = false;
@@ -267,6 +276,9 @@ export default function Home() {
             pageType={pageType}
             fontFamily={fontFamily}
             onError={setError}
+            onStatusChange={(status, name, err) => {
+              setToastState({ status, filename: name, error: err });
+            }}
           />
         </div>
       </header>
@@ -343,6 +355,13 @@ export default function Home() {
           />
         </section>
       </main>
+
+      <ExportToast
+        status={toastState.status}
+        filename={toastState.filename}
+        error={toastState.error}
+        onDismiss={() => setToastState((prev) => ({ ...prev, status: "idle" }))}
+      />
     </div>
   );
 }
