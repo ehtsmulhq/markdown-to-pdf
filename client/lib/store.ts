@@ -99,7 +99,7 @@ export function setActiveDocumentId(id: string): void {
 
 export function createNewDocument(
   initialContent: string,
-  settings: DocumentSettings = { pageType: "a4", fontFamily: "sans", toc: false }
+  settings: DocumentSettings = { pageType: "a4", fontFamily: "sans", toc: true }
 ): StoredDocument {
   const id = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `doc_${Date.now()}`;
   const now = Date.now();

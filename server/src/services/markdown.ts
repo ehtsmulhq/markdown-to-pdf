@@ -1,9 +1,4 @@
-import { marked } from "marked";
-
-marked.setOptions({
-  gfm: true,
-  breaks: false,
-});
+import { Marked } from "marked";
 
 export type FontFamilyChoice = "sans" | "serif" | "mono" | "garamond" | "modern";
 
@@ -19,33 +14,35 @@ export interface MarkdownRenderOptions {
   toc?: boolean;
 }
 
-export function generateTableOfContents(html: string): { tocHtml: string; contentWithIds: string } {
-  const headingRegex = /<h([1-3])>([^<]+)<\/h\1>/gi;
-  const headings: { level: number; text: string; id: string }[] = [];
+export interface HeadingItem {
+  depth: number;
+  text: string;
+  id: string;
+}
 
-  const contentWithIds = html.replace(headingRegex, (_, levelStr, text) => {
-    const level = parseInt(levelStr, 10);
-    const id = text
-      .trim()
-      .toLowerCase()
-      .replace(/[^\w\s-]/g, "")
-      .replace(/\s+/g, "-");
-    headings.push({ level, text: text.trim(), id });
-    return `<h${level} id="${id}">${text}</h${level}>`;
-  });
+export function generateTocHtml(headings: HeadingItem[]): string {
+  if (headings.length === 0) return "";
 
-  if (headings.length === 0) {
-    return { tocHtml: "", contentWithIds };
-  }
-
-  let tocHtml = `<nav class="toc-container">\n<h2 class="toc-title">Table of Contents</h2>\n<ul class="toc-list">\n`;
+  let listHtml = "";
   for (const h of headings) {
-    const indentClass = h.level === 1 ? "toc-h1" : h.level === 2 ? "toc-h2" : "toc-h3";
-    tocHtml += `  <li class="${indentClass}"><a href="#${h.id}">${h.text}</a></li>\n`;
+    const depthClass = `toc-depth-${h.depth}`;
+    listHtml += `  <li class="toc-item ${depthClass}">
+    <a href="#${h.id}" class="toc-link">
+      <span class="toc-text">${h.text}</span>
+      <span class="toc-dots"></span>
+    </a>
+  </li>\n`;
   }
-  tocHtml += `</ul>\n<div class="page-break"></div>\n</nav>\n`;
 
-  return { tocHtml, contentWithIds };
+  return `<nav class="toc-card" aria-label="Table of Contents">
+  <div class="toc-header">
+    <h2 class="toc-title">Table of Contents</h2>
+    <span class="toc-badge">Directory</span>
+  </div>
+  <ul class="toc-list">
+${listHtml}  </ul>
+</nav>
+<div class="page-break"></div>\n`;
 }
 
 export async function markdownToHtml(
@@ -74,43 +71,97 @@ export async function markdownToHtml(
     }
 
     /* Table of Contents Styling */
-    .toc-container {
-      margin-bottom: 2em;
-      padding-bottom: 1em;
+    .toc-card {
+      margin: 0 0 2.5em;
+      padding: 1.5em 1.8em;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      break-inside: avoid !important;
+      page-break-inside: avoid !important;
+    }
+
+    .toc-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #2563eb;
+      padding-bottom: 0.5em;
+      margin-bottom: 1.2em;
     }
 
     .toc-title {
-      font-size: 1.6em;
+      font-size: 1.3em;
       font-weight: 700;
-      border-bottom: 2px solid #2563eb;
-      padding-bottom: 0.2em;
-      margin-top: 0;
-      margin-bottom: 1em;
+      margin: 0 !important;
       color: #0f172a;
+      border: none !important;
+      padding: 0 !important;
+    }
+
+    .toc-badge {
+      font-size: 0.75em;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #2563eb;
+      background: rgba(37, 99, 235, 0.1);
+      padding: 0.2em 0.6em;
+      border-radius: 4px;
     }
 
     .toc-list {
-      list-style-type: none;
-      padding-left: 0;
-      margin: 0;
+      list-style: none !important;
+      padding-left: 0 !important;
+      margin: 0 !important;
     }
 
-    .toc-list li {
-      margin: 0.4em 0;
+    .toc-item {
+      margin: 0.45em 0;
       line-height: 1.4;
     }
 
-    .toc-h1 { font-weight: 600; font-size: 1.05em; margin-top: 0.6em; }
-    .toc-h2 { padding-left: 1.2em; font-size: 0.95em; color: #334155; }
-    .toc-h3 { padding-left: 2.4em; font-size: 0.88em; color: #64748b; }
-
-    .toc-list a {
-      color: #2563eb;
-      text-decoration: none;
+    .toc-depth-1 {
+      font-weight: 700;
+      font-size: 0.98em;
+      margin-top: 0.8em;
+      color: #0f172a;
     }
 
-    .toc-list a:hover {
-      text-decoration: underline;
+    .toc-depth-2 {
+      font-weight: 500;
+      font-size: 0.92em;
+      padding-left: 1.2em;
+      color: #334155;
+    }
+
+    .toc-depth-3 {
+      font-weight: 400;
+      font-size: 0.85em;
+      padding-left: 2.4em;
+      color: #64748b;
+    }
+
+    .toc-link {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      color: inherit !important;
+      text-decoration: none !important;
+      gap: 0.5em;
+    }
+
+    .toc-text {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .toc-dots {
+      flex: 1;
+      border-bottom: 1px dotted #94a3b8;
+      opacity: 0.5;
+      margin-bottom: 0.25em;
     }
 
     /* Prevent awkward page splits inside diagrams, images, tables, code blocks & headings */
@@ -191,7 +242,6 @@ export async function markdownToHtml(
 
     li { margin-bottom: 0.3em; }
 
-    /* Modern Professional Table Styling for PDF Export */
     table {
       border-collapse: separate;
       border-spacing: 0;
@@ -241,19 +291,59 @@ export async function markdownToHtml(
     }
   `;
 
+  const headings: HeadingItem[] = [];
+  const slugCounts = new Map<string, number>();
+
+  const markedInstance = new Marked();
+
+  markedInstance.use({
+    renderer: {
+      heading({ tokens, depth, text }) {
+        const plainText = text.replace(/<[^>]+>/g, "").replace(/[*_`~[\]]/g, "").trim();
+        let slug = plainText
+          .toLowerCase()
+          .replace(/[^\w\s-]/g, "")
+          .replace(/\s+/g, "-")
+          .trim();
+        if (!slug) slug = `section-${headings.length + 1}`;
+
+        const count = slugCounts.get(slug) || 0;
+        slugCounts.set(slug, count + 1);
+        const uniqueId = count > 0 ? `${slug}-${count}` : slug;
+
+        headings.push({ depth, text: plainText, id: uniqueId });
+        const parsed = this.parser.parseInline(tokens);
+        return `<h${depth} id="${uniqueId}">${parsed}</h${depth}>\n`;
+      },
+    },
+  });
+
   let processedMarkdown = markdown
     .replace(/<!--\s*page\s*break\s*-->/gi, '<div class="page-break"></div>')
     .replace(/<!--\s*pagebreak\s*-->/gi, '<div class="page-break"></div>')
-    .replace(/<div\s+class=["']page-break-tag["']\s*>\s*<\/div>/gi, '<div class="page-break"></div>')
+    .replace(/<div\s+class=["']page-break(-tag)?["']\s*>\s*<\/div>/gi, '<div class="page-break"></div>')
     .replace(/\\pagebreak/gi, '<div class="page-break"></div>')
     .replace(/\[\[pagebreak\]\]/gi, '<div class="page-break-tag"></div>');
 
-  let rawHtml = await marked.parse(processedMarkdown);
+  let rawHtml = markedInstance.parse(processedMarkdown) as string;
+  rawHtml = rawHtml.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
 
-  let finalBody = rawHtml;
-  if (options.toc) {
-    const { tocHtml, contentWithIds } = generateTableOfContents(rawHtml);
-    finalBody = `${tocHtml}${contentWithIds}`;
+  const hasManualTocTag = /\[toc\]|\[\[toc\]\]|<!--\s*toc\s*-->/i.test(markdown);
+  const shouldIncludeToc = Boolean(options.toc || hasManualTocTag);
+
+  if (shouldIncludeToc && headings.length > 0) {
+    const tocHtml = generateTocHtml(headings);
+    if (hasManualTocTag) {
+      rawHtml = rawHtml.replace(/<p>\s*(\[toc\]|\[\[toc\]\]|<!--\s*toc\s*-->)\s*<\/p>/i, tocHtml);
+    } else {
+      const firstH1Index = rawHtml.indexOf("</h1>");
+      if (firstH1Index !== -1) {
+        const insertPos = firstH1Index + 5;
+        rawHtml = rawHtml.slice(0, insertPos) + "\n" + tocHtml + rawHtml.slice(insertPos);
+      } else {
+        rawHtml = tocHtml + "\n" + rawHtml;
+      }
+    }
   }
 
   return `<!DOCTYPE html>
@@ -264,7 +354,7 @@ export async function markdownToHtml(
   <style>${PRINT_STYLES}</style>
 </head>
 <body>
-  ${finalBody}
+  ${rawHtml}
 </body>
 </html>`;
 }

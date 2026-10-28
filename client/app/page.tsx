@@ -19,6 +19,8 @@ const INITIAL_MANUSCRIPT = `# The Typesetter
 
 A dedicated **Markdown-to-PDF Studio** designed around print-accurate proofs and distraction-free composition.
 
+[toc]
+
 ## Architectural Principles
 
 1. **True-to-Print Proofs**: What you see in the right-hand proof is the identical HTML structure sent to the headless Chromium PDF compiler.

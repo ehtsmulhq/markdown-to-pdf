@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { type FontFamilyChoice } from "@/lib/api";
-import { usePreview } from "@/lib/hooks/usePreview";
+import { processMarkdownContent, FONT_MAP } from "@/lib/markdown";
 
 interface MarkdownPreviewProps {
   content: string;
@@ -44,66 +44,57 @@ export default function MarkdownPreview({
   const [totalPages, setTotalPages] = useState(1);
   const [showPageGuides, setShowPageGuides] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const spec = PAGE_SPECS[pageType];
-  const { html, loading } = usePreview(content, fontFamily, toc);
+  const selectedFontStack = FONT_MAP[fontFamily] || FONT_MAP.sans;
+
+  // Process markdown into clean HTML with TOC and heading IDs
+  const { html, headings } = useMemo(() => {
+    if (!content.trim()) return { html: "", headings: [] };
+    return processMarkdownContent(content, { toc, isPreview: true });
+  }, [content, toc]);
 
   const recalculatePageCount = () => {
-    if (!iframeRef.current || !iframeRef.current.contentDocument) return;
-    try {
-      const doc = iframeRef.current.contentDocument;
-      const height = Math.max(doc.body?.scrollHeight || 0, doc.documentElement?.scrollHeight || 0);
-      if (height > 0) {
-        iframeRef.current.style.height = `${height + 40}px`;
-        const pages = Math.ceil((height - spec.marginVert * 2) / spec.printableHeight);
-        setTotalPages(Math.max(pages, 1));
-      }
-    } catch {
-      // In case of any cross-origin sandboxing catch
-    }
+    if (!contentRef.current) return;
+    const contentHeight = contentRef.current.scrollHeight - spec.marginVert * 2;
+    const pages = Math.ceil(contentHeight / spec.printableHeight);
+    setTotalPages(Math.max(pages, 1));
   };
 
   useEffect(() => {
-    if (!iframeRef.current) return;
-    const iframe = iframeRef.current;
+    recalculatePageCount();
 
-    const handleIframeLoad = () => {
-      recalculatePageCount();
-      // inject theme preference styling if dark mode is active
-      try {
-        const doc = iframe.contentDocument;
-        if (doc && doc.body) {
-          if (isDark) {
-            doc.body.style.filter = "invert(0.9) hue-rotate(180deg)";
-            const imgs = doc.querySelectorAll("img, pre, svg");
-            imgs.forEach((el) => {
-              (el as HTMLElement).style.filter = "invert(1) hue-rotate(180deg)";
-            });
-          } else {
-            doc.body.style.filter = "none";
-          }
+    const images = contentRef.current?.querySelectorAll("img");
+    if (images && images.length > 0) {
+      images.forEach((img) => {
+        if (!img.complete) {
+          img.addEventListener("load", recalculatePageCount, { once: true });
         }
-      } catch {
-        // safe sandbox
-      }
-    };
-
-    iframe.addEventListener("load", handleIframeLoad);
-    // Also trigger shortly after html updates
-    const timer = setTimeout(handleIframeLoad, 100);
-
-    return () => {
-      iframe.removeEventListener("load", handleIframeLoad);
-      clearTimeout(timer);
-    };
-  }, [html, isDark, pageType, fontFamily, spec.marginVert, spec.printableHeight]);
+      });
+    }
+  }, [html, pageType, fontFamily, spec.marginVert, spec.printableHeight]);
 
   const handleScroll = () => {
     if (scrollRef.current) {
       const scrollTop = scrollRef.current.scrollTop;
       const page = Math.floor(scrollTop / spec.printableHeight) + 1;
       setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+    }
+  };
+
+  // Smooth scroll handler for TOC links
+  const handleContentClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const anchor = (e.target as HTMLElement).closest("a");
+    if (!anchor) return;
+    const href = anchor.getAttribute("href");
+    if (href && href.startsWith("#")) {
+      e.preventDefault();
+      const id = href.slice(1);
+      const targetEl = document.getElementById(id);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     }
   };
 
@@ -125,9 +116,9 @@ export default function MarkdownPreview({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          <h3 className="text-base font-semibold text-foreground mb-1">Live PDF Preview</h3>
+          <h3 className="text-base font-semibold text-foreground mb-1">Live Proof Preview</h3>
           <p className="text-xs text-muted max-w-xs">
-            Start typing markdown or upload a file to preview your rendered document with 100% server-accurate layout.
+            Start typing markdown or upload a file to preview your rendered document with exact page break indicators.
           </p>
         </div>
       </div>
@@ -144,11 +135,8 @@ export default function MarkdownPreview({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
-            Server Proof
+            Print Proof
           </span>
-          {loading && (
-            <span className="text-[10px] text-accent animate-pulse">Rendering...</span>
-          )}
           <span className="text-muted-foreground">•</span>
           <span className="text-foreground font-medium text-[11px] sm:text-xs">
             Page {currentPage} of {totalPages}
@@ -192,8 +180,16 @@ export default function MarkdownPreview({
           className="w-full relative transition-all duration-200 min-w-0"
         >
           <div
-            className={`min-h-[500px] sm:min-h-[750px] rounded-xl shadow-paper border transition-all duration-200 relative w-full min-w-0 box-border overflow-hidden ${
-              isDark ? "bg-surface border-border" : "bg-white border-slate-200"
+            ref={contentRef}
+            onClick={handleContentClick}
+            style={{
+              fontFamily: selectedFontStack,
+              padding: `${spec.marginVert}px`,
+            }}
+            className={`min-h-[750px] rounded-xl shadow-paper border transition-all duration-200 relative text-[11pt] leading-[1.6] w-full min-w-0 box-border ${
+              isDark
+                ? "bg-[#18181b] text-[#f1f5f9] border-[#27272a] prose prose-invert max-w-none prose-headings:font-semibold prose-headings:text-[#f1f5f9] prose-a:text-accent prose-code:rounded prose-code:bg-elevated prose-code:px-1.5 prose-code:py-0.5 prose-code:before:content-none prose-code:after:content-none prose-pre:bg-[#0f172a] prose-blockquote:border-l-accent"
+                : "bg-white text-slate-900 border-slate-200 prose prose-slate max-w-none prose-headings:font-semibold prose-headings:text-slate-900 prose-a:text-blue-600 prose-code:rounded prose-code:bg-slate-100 prose-code:text-blue-900 prose-code:px-1.5 prose-code:py-0.5 prose-code:before:content-none prose-code:after:content-none prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-blockquote:border-l-blue-600"
             }`}
           >
             {/* Mathematical Page Break Guidelines Overlay */}
@@ -212,15 +208,8 @@ export default function MarkdownPreview({
                 </div>
               ))}
 
-            {/* Sandboxed Server-rendered HTML Iframe */}
-            <iframe
-              ref={iframeRef}
-              srcDoc={html}
-              title="Proof Preview"
-              sandbox="allow-same-origin"
-              className="w-full border-0 block"
-              style={{ minHeight: "750px", overflow: "hidden" }}
-            />
+            {/* Rendered HTML Proof with TOC and manual pagebreaks */}
+            <div dangerouslySetInnerHTML={{ __html: html }} />
           </div>
         </div>
       </div>

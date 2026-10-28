@@ -104,24 +104,29 @@ export default function SettingsPanel({
         </div>
 
         {/* Table of Contents Toggle */}
-        <div className="flex items-center justify-between border-t border-border pt-3">
-          <div>
-            <span className="font-semibold text-foreground">Table of Contents</span>
-            <p className="text-[10px] text-muted">Generate anchored heading directory</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => onTocChange(!toc)}
-            className={`w-10 h-5 rounded-full transition-colors relative p-0.5 ${
-              toc ? "bg-accent" : "bg-elevated border border-border"
-            }`}
-          >
-            <div
-              className={`w-4 h-4 rounded-full bg-white transition-transform ${
-                toc ? "translate-x-5" : "translate-x-0"
+        <div className="border-t border-border pt-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="font-semibold text-foreground">Table of Contents</span>
+              <p className="text-[10px] text-muted">Generate anchored heading directory</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => onTocChange(!toc)}
+              className={`w-10 h-5 rounded-full transition-colors relative p-0.5 ${
+                toc ? "bg-accent" : "bg-elevated border border-border"
               }`}
-            />
-          </button>
+            >
+              <div
+                className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                  toc ? "translate-x-5" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div>
+          <p className="text-[10px] text-muted mt-1.5 italic">
+            Tip: You can also place <code className="bg-elevated px-1 py-0.5 rounded font-mono text-foreground">[toc]</code> anywhere in your document to position it manually.
+          </p>
         </div>
 
         {/* Page Header Template */}

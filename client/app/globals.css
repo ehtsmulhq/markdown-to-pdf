@@ -101,4 +101,102 @@
     @apply border-border-subtle text-foreground;
     background: var(--surface-hover);
   }
+
+  /* Table of Contents Styling */
+  .toc-card {
+    margin: 1.5em 0 2em;
+    padding: 1.4em 1.6em;
+    background: var(--elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+
+  .toc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 0.5em;
+    margin-bottom: 1em;
+  }
+
+  .toc-title {
+    font-size: 1.2em;
+    font-weight: 700;
+    margin: 0 !important;
+    color: var(--foreground);
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  .toc-badge {
+    font-size: 0.72em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    background: rgba(37, 99, 235, 0.1);
+    padding: 0.2em 0.6em;
+    border-radius: 4px;
+  }
+
+  .toc-list {
+    list-style: none !important;
+    padding-left: 0 !important;
+    margin: 0 !important;
+  }
+
+  .toc-item {
+    margin: 0.45em 0;
+    line-height: 1.4;
+  }
+
+  .toc-depth-1 {
+    font-weight: 700;
+    font-size: 0.95em;
+    margin-top: 0.6em;
+    color: var(--foreground);
+  }
+
+  .toc-depth-2 {
+    font-weight: 500;
+    font-size: 0.88em;
+    padding-left: 1.2em;
+    color: var(--muted);
+  }
+
+  .toc-depth-3 {
+    font-weight: 400;
+    font-size: 0.82em;
+    padding-left: 2.2em;
+    color: var(--muted-foreground);
+  }
+
+  .toc-link {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    color: inherit !important;
+    text-decoration: none !important;
+    gap: 0.5em;
+    transition: color 0.15s ease;
+    cursor: pointer;
+  }
+
+  .toc-link:hover {
+    color: var(--accent) !important;
+  }
+
+  .toc-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .toc-dots {
+    flex: 1;
+    border-bottom: 1px dotted var(--border-subtle);
+    opacity: 0.6;
+    margin-bottom: 0.25em;
+  }
 }
