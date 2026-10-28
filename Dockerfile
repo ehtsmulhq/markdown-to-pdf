@@ -34,8 +34,8 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 # Build production assets
 RUN npm run build
 
-# Expose single unified port
-EXPOSE 3000
+# Expose unified ports for frontend (3000) and backend (4000)
+EXPOSE 3000 4000
 
 ENV NODE_ENV=production
 ENV PORT=4000

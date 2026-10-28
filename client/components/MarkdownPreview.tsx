@@ -4,6 +4,67 @@ import React, { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { type FontFamilyChoice } from "@/lib/api";
+import type { Plugin } from "unified";
+import type { Root, Node, Parent } from "mdast";
+
+const remarkPageBreak: Plugin<[], Root> = () => {
+  return (tree: Root) => {
+    const PAGE_BREAK_REGEX =
+      /^(<!--\s*page\s*break\s*-->|<!--\s*pagebreak\s*-->|\\pagebreak|\[\[pagebreak\]\]|<div\s+class=["']page-break(-tag)?["']\s*>\s*<\/div>)$/i;
+
+    function visit(node: Node, index: number | undefined, parent: Parent | undefined) {
+      if (!parent || index === undefined) {
+        if ("children" in node && Array.isArray((node as Parent).children)) {
+          const p = node as Parent;
+          for (let i = 0; i < p.children.length; i++) {
+            visit(p.children[i], i, p);
+          }
+        }
+        return;
+      }
+
+      if (node.type === "paragraph" && "children" in node) {
+        const pNode = node as Parent;
+        if (pNode.children.length === 1 && pNode.children[0].type === "text") {
+          const textNode = pNode.children[0] as { type: "text"; value: string };
+          if (PAGE_BREAK_REGEX.test(textNode.value.trim())) {
+            parent.children[index] = {
+              type: "pageBreak" as any,
+              data: {
+                hName: "div",
+                hProperties: { className: "page-break-tag" },
+              },
+            } as any;
+            return;
+          }
+        }
+      }
+
+      if (node.type === "html" && "value" in node) {
+        const htmlNode = node as { type: "html"; value: string };
+        if (PAGE_BREAK_REGEX.test(htmlNode.value.trim())) {
+          parent.children[index] = {
+            type: "pageBreak" as any,
+            data: {
+              hName: "div",
+              hProperties: { className: "page-break-tag" },
+            },
+          } as any;
+          return;
+        }
+      }
+
+      if ("children" in node && Array.isArray((node as Parent).children)) {
+        const p = node as Parent;
+        for (let i = 0; i < p.children.length; i++) {
+          visit(p.children[i], i, p);
+        }
+      }
+    }
+
+    visit(tree, undefined, undefined);
+  };
+};
 
 interface MarkdownPreviewProps {
   content: string;
@@ -55,13 +116,6 @@ export default function MarkdownPreview({
 
   const spec = PAGE_SPECS[pageType];
   const selectedFontStack = FONT_MAP[fontFamily] || FONT_MAP.sans;
-
-  const processedContent = content
-    .replace(/<!--\s*page\s*break\s*-->/gi, '<div class="page-break-tag"></div>')
-    .replace(/<!--\s*pagebreak\s*-->/gi, '<div class="page-break-tag"></div>')
-    .replace(/\\pagebreak/gi, '<div class="page-break-tag"></div>')
-    .replace(/\[\[pagebreak\]\]/gi, '<div class="page-break-tag"></div>')
-    .replace(/<div\s+class=["']page-break["']\s*>\s*<\/div>/gi, '<div class="page-break-tag"></div>');
 
   const recalculatePageCount = () => {
     if (!contentRef.current) return;
@@ -200,7 +254,7 @@ export default function MarkdownPreview({
               ))}
 
             <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
+              remarkPlugins={[remarkGfm, remarkPageBreak]}
               components={{
                 div({ className, children, ...props }) {
                   if (className === "page-break-tag" || className === "page-break") {
@@ -276,7 +330,7 @@ export default function MarkdownPreview({
                 },
               }}
             >
-              {processedContent}
+              {content}
             </ReactMarkdown>
           </div>
         </div>

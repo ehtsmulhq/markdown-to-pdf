@@ -34,8 +34,8 @@ An industry-grade **Markdown-to-PDF Studio** built with **Next.js 15 (React 19)*
 
 ```bash
 # 1. Clone the repository
-git clone http://192.168.0.127:3000/ehtsmulhq/MarkDown-to-PDF.git
-cd MarkDown-to-PDF
+git clone https://github.com/ehtsmulhq/markdown-to-pdf.git
+cd markdown-to-pdf
 
 # 2. Install workspace dependencies
 npm install

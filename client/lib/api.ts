@@ -7,7 +7,7 @@ export async function convertToPdf(
 ): Promise<Blob> {
   // Determine API conversion endpoint dynamically:
   // 1. Explicit NEXT_PUBLIC_API_URL if configured during build
-  // 2. Dynamic browser window.location.origin (e.g. http://192.168.0.127:4000/api/convert)
+  // 2. Dynamic browser window.location.origin (e.g. http://localhost:4000/api/convert)
   // 3. Fallback relative '/api/convert'
   let endpoint = "/api/convert";
 

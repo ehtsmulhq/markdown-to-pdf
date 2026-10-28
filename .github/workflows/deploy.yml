@@ -16,7 +16,7 @@ concurrency:
 jobs:
   deploy:
     name: 🚀 Production Docker Deployment
-    runs-on: [ubuntu-latest, self-hosted, linux, host, docker]
+    runs-on: ubuntu-latest
 
     steps:
       - name: 📥 Checkout Code
