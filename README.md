@@ -1,24 +1,42 @@
-# 📄 MD to PDF — Professional Markdown Studio
+# 📄 The Typesetter — Professional Markdown Studio (v2)
 
-An industry-grade **Markdown-to-PDF Studio** built with **Next.js 15 (React 19)**, **TailwindCSS**, and **Express + Puppeteer**. Features live 96 DPI paper preview, visual page break guides, custom font family selections, and high-fidelity PDF export.
+An industry-grade **Markdown-to-PDF Studio** designed around print-accurate proofs and distraction-free composition. Built with **Next.js 15 (React 19)**, **TailwindCSS**, and **Express + Puppeteer**.
 
 ---
 
-## ✨ Key Features
+## ✨ Architectural Principles & Features
 
-- ⚡ **Real-Time Calibrated Preview**: Live GFM markdown rendering with 96 DPI pixel-for-pixel page break preview matching Puppeteer PDF output.
-- 🎨 **Industry-Grade Theme Engine**: 3-way theme control (**Light ☀️**, **Dark 🌙**, and **System OS 💻** sync) with CSS design variable tokens.
-- ✂ **Visual & Manual Page Breaks**: Visual page boundary guidelines + support for `<!-- pagebreak -->` manual page break tags.
-- 🛡️ **Diagram & Table Protection**: Automatic `break-inside: avoid` rules for tables, code blocks, blockquotes, and diagrams to prevent awkward mid-element page cuts.
-- 🔤 **Dynamic Font Family Selection**: Choose between **Sans-Serif**, **Serif**, **Monospace**, **Garamond**, and **Modern Sans** for live preview and exported PDFs.
-- 📊 **Modern Table Styling**: Beautiful rounded tables with uppercase headers and zebra striping.
-- 📁 **File Import & Drag & Drop**: Sub-toolbar upload button + direct `.md` file drag-and-drop onto the editor canvas.
+- ⚡ **True-to-Print Proofing Pipeline**: Live preview iframe renders using the *exact same* HTML & CSS engine as the headless Chromium PDF compiler.
+- 🎨 **Ink & Paper Design Aesthetic**: Distinctive Warm Linen (light) and Darkroom (dark) palettes designed for readability.
+- 💾 **Continuous Local Autosave & Library**: Never lose a keystroke with localStorage persistence, instant document switching, and multi-manuscript management.
+- 📐 **Visual & Manual Page Breaks**: Visual page boundary guidelines with support for manual `<!-- pagebreak -->` tags.
+- 🛡️ **Split Protection**: Automatic `break-inside: avoid` rules for tables, code blocks, blockquotes, and diagrams.
+- 📑 **Dynamic Table of Contents (TOC)**: Automatically extracts headings and generates an anchored table of contents directory.
+- 🏷️ **Custom Running Headers & Footers**: Configurable running headers and page number counters (`{page} / {pages}`).
+- ⌨️ **Keyboard-First Workflow**: Full keyboard ergonomics for composition, navigation, and formatting.
+
+---
+
+## ⌨️ Keyboard Shortcuts
+
+| Shortcut | Action |
+| :--- | :--- |
+| `Ctrl + S` | Autosave manuscript to local storage |
+| `Ctrl + H` | Toggle inline Search & Replace bar |
+| `Ctrl + ,` | Open Typography & Composition Settings |
+| `Ctrl + B` | Wrap selection in `**bold**` |
+| `Ctrl + I` | Wrap selection in `*italic*` |
+| `Ctrl + K` | Wrap selection in `[link](url)` |
+| `Ctrl + Enter` | Insert manual `<!-- pagebreak -->` |
+| `Tab` | Indent 2 spaces (auto-continuation on lists) |
+| `Shift + Tab` | Dedent line |
+| `Escape` | Dismiss open menus and panels |
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Client**: Next.js 15, React 19, TailwindCSS, React-Markdown, Remark-GFM, Lucide / Heroicons.
+- **Client**: Next.js 15, React 19, TailwindCSS, TypeScript.
 - **Server**: Express 5, Puppeteer (Headless Chromium), Marked (GFM HTML compiler).
 - **Tooling**: TypeScript, Concurrently, Docker.
 
@@ -27,7 +45,7 @@ An industry-grade **Markdown-to-PDF Studio** built with **Next.js 15 (React 19)*
 ## 🚀 Quick Start (Development)
 
 ### Prerequisites
-- Node.js `v18.x` or `v20.x`
+- Node.js `v20.x` or `v22.x`
 - npm `v9+`
 
 ### Installation & Execution
@@ -50,64 +68,15 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 🐳 Production Deployment with Docker
 
-The fastest and most reliable way to deploy **MD to PDF** is using Docker.
-
 ### Using Docker Compose (Recommended)
 
 ```bash
 # Build and run containers in detached mode
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
-- **Client App**: `http://localhost:3000`
+- **Client App**: `http://localhost:8089` (or host configured port)
 - **Backend API**: `http://localhost:4000`
-
-### Using Docker CLI
-
-```bash
-# Build the Docker image
-docker build -t md-to-pdf:latest .
-
-# Run the container
-docker run -d -p 3000:3000 -p 4000:4000 --name md-to-pdf-app md-to-pdf:latest
-```
-
----
-
-## 💻 Manual Production Build & PM2 Deployment
-
-```bash
-# 1. Build client and server
-npm run build
-
-# 2. Start production servers
-npm run start
-```
-
-Or using **PM2** on a Linux server:
-
-```bash
-# Start server API
-pm2 start server/dist/index.js --name "md-pdf-api"
-
-# Start Next.js client
-pm2 start "npm --prefix client run start" --name "md-pdf-client"
-```
-
----
-
-## ⚙️ Environment Variables
-
-### Client (`client/.env.local`)
-```env
-NEXT_PUBLIC_API_URL=http://localhost:4000
-```
-
-### Server (`server/.env`)
-```env
-PORT=4000
-# PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-```
 
 ---
 
