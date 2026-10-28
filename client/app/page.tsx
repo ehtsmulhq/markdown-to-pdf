@@ -11,6 +11,7 @@ import ExportToast, { type ExportToastProps } from "@/components/ExportToast";
 import { type FontFamilyChoice } from "@/lib/api";
 import { useDocuments } from "@/lib/hooks/useDocuments";
 import { useAutosave } from "@/lib/hooks/useAutosave";
+import { registerShortcut, unregisterShortcut } from "@/lib/keyboard";
 
 type ThemeMode = "light" | "dark" | "system";
 
@@ -52,6 +53,7 @@ export default function Home() {
   const [cursorPos, setCursorPos] = useState({ line: 1, col: 1 });
   const [menuOpen, setMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [mobileTab, setMobileTab] = useState<"editor" | "preview">("editor");
 
   const [themeMode, setThemeMode] = useState<ThemeMode>("system");
@@ -109,6 +111,23 @@ export default function Home() {
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, [applyTheme]);
+
+  // Global Keyboard Shortcuts
+  useEffect(() => {
+    registerShortcut("Ctrl+H", () => setSearchOpen((prev) => !prev));
+    registerShortcut("Ctrl+,", () => setSettingsOpen((prev) => !prev));
+    registerShortcut("Escape", () => {
+      setMenuOpen(false);
+      setSettingsOpen(false);
+      setSearchOpen(false);
+    });
+
+    return () => {
+      unregisterShortcut("Ctrl+H");
+      unregisterShortcut("Ctrl+,");
+      unregisterShortcut("Escape");
+    };
+  }, []);
 
   const cycleTheme = () => {
     const next: ThemeMode =
@@ -211,6 +230,8 @@ export default function Home() {
               }
             }}
             onCursorChange={(line, col) => setCursorPos({ line, col })}
+            searchOpen={searchOpen}
+            onSearchClose={() => setSearchOpen(false)}
           />
         </section>
 

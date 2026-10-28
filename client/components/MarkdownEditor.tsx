@@ -1,6 +1,9 @@
 "use client";
 
 import React, { useRef, useState } from "react";
+import LineGutter from "./Editor/LineGutter";
+import SearchBar from "./Editor/SearchBar";
+import { useEditorEnhancements } from "@/lib/hooks/useEditorEnhancements";
 
 interface MarkdownEditorProps {
   value: string;
@@ -8,6 +11,8 @@ interface MarkdownEditorProps {
   onUpload?: (content: string, name: string) => void;
   onError?: (message: string) => void;
   onCursorChange?: (line: number, col: number) => void;
+  searchOpen?: boolean;
+  onSearchClose?: () => void;
 }
 
 export default function MarkdownEditor({
@@ -16,9 +21,20 @@ export default function MarkdownEditor({
   onUpload,
   onError,
   onCursorChange,
+  searchOpen = false,
+  onSearchClose,
 }: MarkdownEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [scrollTop, setScrollTop] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+
+  const { handleKeyDown: handleEnhanceKeyDown } = useEditorEnhancements(
+    textareaRef,
+    value,
+    onChange
+  );
+
+  const lineCount = value.split("\n").length;
 
   const updateCursorPosition = () => {
     const textarea = textareaRef.current;
@@ -32,23 +48,8 @@ export default function MarkdownEditor({
     onCursorChange(line, col);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // Basic Tab handling
-    if (e.key === "Tab") {
-      e.preventDefault();
-      const textarea = textareaRef.current;
-      if (!textarea) return;
-
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const newValue = value.substring(0, start) + "  " + value.substring(end);
-
-      onChange(newValue);
-      setTimeout(() => {
-        textarea.selectionStart = textarea.selectionEnd = start + 2;
-        updateCursorPosition();
-      }, 0);
-    }
+  const handleScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
+    setScrollTop(e.currentTarget.scrollTop);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -98,34 +99,39 @@ export default function MarkdownEditor({
         isDragging ? "ring-2 ring-accent ring-inset bg-accent/5" : ""
       }`}
     >
-      {/* Drag & Drop Visual Overlay */}
-      {isDragging && (
-        <div className="absolute inset-0 z-30 bg-surface/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center pointer-events-none">
-          <div className="w-12 h-12 rounded-2xl bg-accent/20 border border-accent flex items-center justify-center text-accent mb-3">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-            </svg>
-          </div>
-          <h4 className="text-xs font-semibold text-foreground">Drop markdown file to load</h4>
-        </div>
-      )}
-
-      {/* Raw typesetting manuscript surface */}
-      <textarea
-        ref={textareaRef}
+      {/* Inline Search & Replace Bar */}
+      <SearchBar
+        open={searchOpen}
+        onClose={onSearchClose || (() => {})}
         value={value}
-        onChange={(e) => {
-          onChange(e.target.value);
-          updateCursorPosition();
-        }}
-        onSelect={updateCursorPosition}
-        onClick={updateCursorPosition}
-        onKeyUp={updateCursorPosition}
-        onKeyDown={handleKeyDown}
-        placeholder="Type or paste your markdown manuscript here..."
-        spellCheck={false}
-        className="flex-1 w-full resize-none bg-surface p-6 font-mono text-sm leading-relaxed text-foreground placeholder:text-muted focus:outline-none selection:bg-accent/20 transition-colors duration-150"
+        onChange={onChange}
+        textareaRef={textareaRef}
       />
+
+      {/* Editor Surface with Line Gutter */}
+      <div className="flex flex-1 overflow-hidden relative">
+        <LineGutter lineCount={lineCount} scrollTop={scrollTop} />
+
+        <textarea
+          ref={textareaRef}
+          value={value}
+          onChange={(e) => {
+            onChange(e.target.value);
+            updateCursorPosition();
+          }}
+          onScroll={handleScroll}
+          onSelect={updateCursorPosition}
+          onClick={updateCursorPosition}
+          onKeyUp={updateCursorPosition}
+          onKeyDown={(e) => {
+            handleEnhanceKeyDown(e);
+            setTimeout(updateCursorPosition, 0);
+          }}
+          placeholder="Type or paste your markdown manuscript here..."
+          spellCheck={false}
+          className="flex-1 w-full resize-none bg-surface p-6 font-mono text-sm leading-relaxed text-foreground placeholder:text-muted focus:outline-none selection:bg-accent/20 transition-colors duration-150 overflow-y-auto"
+        />
+      </div>
     </div>
   );
 }
