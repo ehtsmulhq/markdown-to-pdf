@@ -15,9 +15,43 @@ const FONT_MAP: Record<FontFamilyChoice, string> = {
   modern: '"Inter", "Roboto", "Helvetica Neue", Arial, sans-serif',
 };
 
+export interface MarkdownRenderOptions {
+  toc?: boolean;
+}
+
+export function generateTableOfContents(html: string): { tocHtml: string; contentWithIds: string } {
+  const headingRegex = /<h([1-3])>([^<]+)<\/h\1>/gi;
+  const headings: { level: number; text: string; id: string }[] = [];
+
+  const contentWithIds = html.replace(headingRegex, (_, levelStr, text) => {
+    const level = parseInt(levelStr, 10);
+    const id = text
+      .trim()
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "-");
+    headings.push({ level, text: text.trim(), id });
+    return `<h${level} id="${id}">${text}</h${level}>`;
+  });
+
+  if (headings.length === 0) {
+    return { tocHtml: "", contentWithIds };
+  }
+
+  let tocHtml = `<nav class="toc-container">\n<h2 class="toc-title">Table of Contents</h2>\n<ul class="toc-list">\n`;
+  for (const h of headings) {
+    const indentClass = h.level === 1 ? "toc-h1" : h.level === 2 ? "toc-h2" : "toc-h3";
+    tocHtml += `  <li class="${indentClass}"><a href="#${h.id}">${h.text}</a></li>\n`;
+  }
+  tocHtml += `</ul>\n<div class="page-break"></div>\n</nav>\n`;
+
+  return { tocHtml, contentWithIds };
+}
+
 export async function markdownToHtml(
   markdown: string,
-  fontFamily: FontFamilyChoice = "sans"
+  fontFamily: FontFamilyChoice = "sans",
+  options: MarkdownRenderOptions = {}
 ): Promise<string> {
   const selectedFontStack = FONT_MAP[fontFamily] || FONT_MAP.sans;
 
@@ -37,6 +71,46 @@ export async function markdownToHtml(
       color: #0f172a;
       margin: 0;
       padding: 0;
+    }
+
+    /* Table of Contents Styling */
+    .toc-container {
+      margin-bottom: 2em;
+      padding-bottom: 1em;
+    }
+
+    .toc-title {
+      font-size: 1.6em;
+      font-weight: 700;
+      border-bottom: 2px solid #2563eb;
+      padding-bottom: 0.2em;
+      margin-top: 0;
+      margin-bottom: 1em;
+      color: #0f172a;
+    }
+
+    .toc-list {
+      list-style-type: none;
+      padding-left: 0;
+      margin: 0;
+    }
+
+    .toc-list li {
+      margin: 0.4em 0;
+      line-height: 1.4;
+    }
+
+    .toc-h1 { font-weight: 600; font-size: 1.05em; margin-top: 0.6em; }
+    .toc-h2 { padding-left: 1.2em; font-size: 0.95em; color: #334155; }
+    .toc-h3 { padding-left: 2.4em; font-size: 0.88em; color: #64748b; }
+
+    .toc-list a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+
+    .toc-list a:hover {
+      text-decoration: underline;
     }
 
     /* Prevent awkward page splits inside diagrams, images, tables, code blocks & headings */
@@ -65,20 +139,20 @@ export async function markdownToHtml(
       overflow: hidden !important;
     }
 
-    h1 { font-size: 2em; border-bottom: 2px solid #6366f1; padding-bottom: 0.3em; margin-top: 1.5em; margin-bottom: 0.5em; color: #0f172a; }
+    h1 { font-size: 2em; border-bottom: 2px solid #2563eb; padding-bottom: 0.3em; margin-top: 1.5em; margin-bottom: 0.5em; color: #0f172a; }
     h2 { font-size: 1.5em; border-bottom: 1px solid #cbd5e1; padding-bottom: 0.3em; margin-top: 1.5em; margin-bottom: 0.5em; color: #1e293b; }
     h3 { font-size: 1.25em; margin-top: 1.5em; margin-bottom: 0.5em; color: #334155; }
     h4 { font-size: 1em; margin-top: 1.2em; margin-bottom: 0.4em; color: #475569; }
 
     p { margin: 0 0 1em; }
 
-    a { color: #4f46e5; text-decoration: underline; font-weight: 500; }
+    a { color: #2563eb; text-decoration: underline; font-weight: 500; }
 
     code {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
       font-size: 0.88em;
       background: #f1f5f9;
-      color: #4338ca;
+      color: #1e40af;
       padding: 0.15em 0.4em;
       border-radius: 4px;
       border: 1px solid #e2e8f0;
@@ -104,7 +178,7 @@ export async function markdownToHtml(
     blockquote {
       margin: 0 0 1.2em;
       padding: 0.6em 1.2em;
-      border-left: 4px solid #6366f1;
+      border-left: 4px solid #2563eb;
       background: #f8fafc;
       color: #334155;
       border-radius: 0 6px 6px 0;
@@ -172,9 +246,15 @@ export async function markdownToHtml(
     .replace(/<!--\s*pagebreak\s*-->/gi, '<div class="page-break"></div>')
     .replace(/<div\s+class=["']page-break-tag["']\s*>\s*<\/div>/gi, '<div class="page-break"></div>')
     .replace(/\\pagebreak/gi, '<div class="page-break"></div>')
-    .replace(/\[\[pagebreak\]\]/gi, '<div class="page-break"></div>');
+    .replace(/\[\[pagebreak\]\]/gi, '<div class="page-break-tag"></div>');
 
-  const body = await marked.parse(processedMarkdown);
+  let rawHtml = await marked.parse(processedMarkdown);
+
+  let finalBody = rawHtml;
+  if (options.toc) {
+    const { tocHtml, contentWithIds } = generateTableOfContents(rawHtml);
+    finalBody = `${tocHtml}${contentWithIds}`;
+  }
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -184,7 +264,7 @@ export async function markdownToHtml(
   <style>${PRINT_STYLES}</style>
 </head>
 <body>
-  ${body}
+  ${finalBody}
 </body>
 </html>`;
 }

@@ -5,7 +5,8 @@ import { fetchPreview, type FontFamilyChoice } from "@/lib/api";
 
 export function usePreview(
   markdown: string,
-  fontFamily: FontFamilyChoice = "sans"
+  fontFamily: FontFamilyChoice = "sans",
+  toc = false
 ): { html: string; loading: boolean } {
   const [html, setHtml] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -24,13 +25,12 @@ export function usePreview(
 
       setLoading(true);
       try {
-        const rendered = await fetchPreview(markdown, fontFamily);
+        const rendered = await fetchPreview(markdown, fontFamily, { toc });
         if (active) {
           lastHtmlRef.current = rendered;
           setHtml(rendered);
         }
       } catch (err) {
-        // Keep last successful render on temporary errors
         console.warn("Live preview refresh skipped:", err);
       } finally {
         if (active) {
@@ -43,7 +43,7 @@ export function usePreview(
       active = false;
       clearTimeout(timeout);
     };
-  }, [markdown, fontFamily]);
+  }, [markdown, fontFamily, toc]);
 
   return {
     html: html || lastHtmlRef.current,

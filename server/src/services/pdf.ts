@@ -4,6 +4,11 @@ import { createQueue } from "./queue.js";
 let browser: Browser | null = null;
 const pdfQueue = createQueue();
 
+export interface PdfExportOptions {
+  headerText?: string;
+  footerText?: string;
+}
+
 async function getBrowser(): Promise<Browser> {
   if (!browser || !browser.isConnected()) {
     const launchOptions: Parameters<typeof puppeteer.launch>[0] = {
@@ -27,7 +32,8 @@ async function getBrowser(): Promise<Browser> {
 
 export async function htmlToPdf(
   html: string,
-  pageType: "letter" | "a4" | "a3" = "a4"
+  pageType: "letter" | "a4" | "a3" = "a4",
+  options: PdfExportOptions = {}
 ): Promise<Buffer> {
   return pdfQueue.enqueue(async () => {
     const instance = await getBrowser();
@@ -41,12 +47,29 @@ export async function htmlToPdf(
         a3: "A3",
       };
       const formatKey = (pageType || "a4").toLowerCase();
+
+      const hasHeaderOrFooter = Boolean(options.headerText || options.footerText);
+
+      const headerTemplate = options.headerText
+        ? `<div style="font-size: 8pt; color: #64748b; font-family: -apple-system, sans-serif; width: 100%; padding: 0 2cm; text-align: right;">${options.headerText}</div>`
+        : "<div></div>";
+
+      const footerTemplate = options.footerText
+        ? `<div style="font-size: 8pt; color: #64748b; font-family: -apple-system, sans-serif; width: 100%; padding: 0 2cm; text-align: center;">${options.footerText
+            .replace(/{page}/g, '<span class="pageNumber"></span>')
+            .replace(/{pages}/g, '<span class="totalPages"></span>')
+            .replace(/{date}/g, new Date().toLocaleDateString())}</div>`
+        : `<div style="font-size: 8pt; color: #94a3b8; font-family: -apple-system, sans-serif; width: 100%; padding: 0 2cm; text-align: center;"><span class="pageNumber"></span> / <span class="totalPages"></span></div>`;
+
       const pdf = await page.pdf({
         format: (pdfFormats[formatKey] || "A4") as "Letter" | "A4" | "A3",
         printBackground: true,
+        displayHeaderFooter: hasHeaderOrFooter,
+        headerTemplate,
+        footerTemplate,
         margin: {
-          top: "2cm",
-          bottom: "2cm",
+          top: options.headerText ? "2.5cm" : "2cm",
+          bottom: options.footerText ? "2.5cm" : "2cm",
           left: "2cm",
           right: "2cm",
         },

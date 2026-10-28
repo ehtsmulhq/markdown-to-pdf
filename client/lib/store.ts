@@ -3,6 +3,9 @@ import { type FontFamilyChoice } from "./api";
 export interface DocumentSettings {
   pageType: "letter" | "a4" | "a3";
   fontFamily: FontFamilyChoice;
+  toc?: boolean;
+  headerText?: string;
+  footerText?: string;
 }
 
 export interface StoredDocument {
@@ -96,7 +99,7 @@ export function setActiveDocumentId(id: string): void {
 
 export function createNewDocument(
   initialContent: string,
-  settings: DocumentSettings = { pageType: "a4", fontFamily: "sans" }
+  settings: DocumentSettings = { pageType: "a4", fontFamily: "sans", toc: false }
 ): StoredDocument {
   const id = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `doc_${Date.now()}`;
   const now = Date.now();

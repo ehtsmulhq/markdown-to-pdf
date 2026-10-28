@@ -1,8 +1,19 @@
 export type FontFamilyChoice = "sans" | "serif" | "mono" | "garamond" | "modern";
 
+export interface PreviewOptions {
+  toc?: boolean;
+}
+
+export interface ConvertOptions {
+  toc?: boolean;
+  headerText?: string;
+  footerText?: string;
+}
+
 export async function fetchPreview(
   markdown: string,
-  fontFamily: FontFamilyChoice = "sans"
+  fontFamily: FontFamilyChoice = "sans",
+  options: PreviewOptions = {}
 ): Promise<string> {
   let endpoint = "/api/preview";
 
@@ -17,7 +28,7 @@ export async function fetchPreview(
     response = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ markdown, fontFamily }),
+      body: JSON.stringify({ markdown, fontFamily, toc: options.toc }),
     });
   } catch (err) {
     console.error("Network / fetch preview error:", err);
@@ -42,12 +53,9 @@ export async function fetchPreview(
 export async function convertToPdf(
   markdown: string,
   pageType: "letter" | "a4" | "a3" = "a4",
-  fontFamily: FontFamilyChoice = "sans"
+  fontFamily: FontFamilyChoice = "sans",
+  options: ConvertOptions = {}
 ): Promise<Blob> {
-  // Determine API conversion endpoint dynamically:
-  // 1. Explicit NEXT_PUBLIC_API_URL if configured during build
-  // 2. Dynamic browser window.location.origin (e.g. http://localhost:4000/api/convert)
-  // 3. Fallback relative '/api/convert'
   let endpoint = "/api/convert";
 
   if (process.env.NEXT_PUBLIC_API_URL) {
@@ -61,7 +69,14 @@ export async function convertToPdf(
     response = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ markdown, pageType, fontFamily }),
+      body: JSON.stringify({
+        markdown,
+        pageType,
+        fontFamily,
+        toc: options.toc,
+        headerText: options.headerText,
+        footerText: options.footerText,
+      }),
     });
   } catch (err) {
     console.error("Network / fetch error:", err);

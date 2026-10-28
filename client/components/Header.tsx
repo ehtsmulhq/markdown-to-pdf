@@ -2,7 +2,7 @@
 
 import React from "react";
 import ExportButton from "./ExportButton";
-import { type FontFamilyChoice } from "@/lib/api";
+import { type FontFamilyChoice, type ConvertOptions } from "@/lib/api";
 
 interface HeaderProps {
   title: string;
@@ -12,6 +12,7 @@ interface HeaderProps {
   markdown: string;
   pageType: "letter" | "a4" | "a3";
   fontFamily: FontFamilyChoice;
+  exportOptions?: ConvertOptions;
   onExportStatusChange: (status: "idle" | "loading" | "success" | "error", filename?: string, error?: string) => void;
 }
 
@@ -23,6 +24,7 @@ export default function Header({
   markdown,
   pageType,
   fontFamily,
+  exportOptions = {},
   onExportStatusChange,
 }: HeaderProps) {
   return (
@@ -75,6 +77,7 @@ export default function Header({
           filename={`${title}.pdf`}
           pageType={pageType}
           fontFamily={fontFamily}
+          options={exportOptions}
           onStatusChange={onExportStatusChange}
         />
       </div>

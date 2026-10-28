@@ -70,11 +70,14 @@ export default function Home() {
   const markdown = activeDoc?.content || "";
   const pageType = activeDoc?.settings.pageType || "a4";
   const fontFamily = activeDoc?.settings.fontFamily || "sans";
+  const toc = Boolean(activeDoc?.settings.toc);
+  const headerText = activeDoc?.settings.headerText || "";
+  const footerText = activeDoc?.settings.footerText || "";
   const title = activeDoc?.title || "Untitled Manuscript";
 
   const { saved, error: saveError } = useAutosave(
     markdown,
-    { pageType, fontFamily },
+    { pageType, fontFamily, toc, headerText, footerText },
     activeDoc?.id || null
   );
 
@@ -165,6 +168,7 @@ export default function Home() {
         markdown={markdown}
         pageType={pageType}
         fontFamily={fontFamily}
+        exportOptions={{ toc, headerText, footerText }}
         onExportStatusChange={(status, name, err) => {
           setToastState({ status, filename: name, error: err });
         }}
@@ -209,6 +213,33 @@ export default function Home() {
           }}
           previewMode="split"
           onPreviewModeChange={() => {}}
+          toc={toc}
+          onTocChange={(newToc) => {
+            if (activeDoc) {
+              setActiveDoc({
+                ...activeDoc,
+                settings: { ...activeDoc.settings, toc: newToc },
+              });
+            }
+          }}
+          headerText={headerText}
+          onHeaderTextChange={(newHeader) => {
+            if (activeDoc) {
+              setActiveDoc({
+                ...activeDoc,
+                settings: { ...activeDoc.settings, headerText: newHeader },
+              });
+            }
+          }}
+          footerText={footerText}
+          onFooterTextChange={(newFooter) => {
+            if (activeDoc) {
+              setActiveDoc({
+                ...activeDoc,
+                settings: { ...activeDoc.settings, footerText: newFooter },
+              });
+            }
+          }}
         />
 
         {/* Editor Pane */}
@@ -246,6 +277,7 @@ export default function Home() {
             pageType={pageType}
             fontFamily={fontFamily}
             isDark={effectiveTheme === "dark"}
+            toc={toc}
           />
         </section>
       </main>

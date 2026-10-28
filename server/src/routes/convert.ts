@@ -5,10 +5,20 @@ import { htmlToPdf } from "../services/pdf.js";
 const router = Router();
 
 router.post("/", async (req: Request, res: Response) => {
-  const { markdown, pageType = "a4", fontFamily = "sans" } = req.body as {
+  const {
+    markdown,
+    pageType = "a4",
+    fontFamily = "sans",
+    toc = false,
+    headerText,
+    footerText,
+  } = req.body as {
     markdown?: string;
     pageType?: "letter" | "a4" | "a3";
     fontFamily?: FontFamilyChoice;
+    toc?: boolean;
+    headerText?: string;
+    footerText?: string;
   };
 
   if (!markdown || typeof markdown !== "string" || !markdown.trim()) {
@@ -17,8 +27,8 @@ router.post("/", async (req: Request, res: Response) => {
   }
 
   try {
-    const html = await markdownToHtml(markdown, fontFamily);
-    const pdf = await htmlToPdf(html, pageType);
+    const html = await markdownToHtml(markdown, fontFamily, { toc });
+    const pdf = await htmlToPdf(html, pageType, { headerText, footerText });
 
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", 'attachment; filename="document.pdf"');

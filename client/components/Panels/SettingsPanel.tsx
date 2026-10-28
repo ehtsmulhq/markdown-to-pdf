@@ -12,6 +12,12 @@ interface SettingsPanelProps {
   onPageTypeChange: (p: "letter" | "a4" | "a3") => void;
   previewMode: "split" | "editor" | "preview";
   onPreviewModeChange: (m: "split" | "editor" | "preview") => void;
+  toc: boolean;
+  onTocChange: (toc: boolean) => void;
+  headerText: string;
+  onHeaderTextChange: (h: string) => void;
+  footerText: string;
+  onFooterTextChange: (f: string) => void;
 }
 
 export default function SettingsPanel({
@@ -23,9 +29,13 @@ export default function SettingsPanel({
   onPageTypeChange,
   previewMode,
   onPreviewModeChange,
+  toc,
+  onTocChange,
+  headerText,
+  onHeaderTextChange,
+  footerText,
+  onFooterTextChange,
 }: SettingsPanelProps) {
-  const panelRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && open) {
@@ -39,7 +49,7 @@ export default function SettingsPanel({
   if (!open) return null;
 
   return (
-    <div className="absolute right-4 top-14 z-40 w-72 rounded-xl border border-border bg-surface p-4 shadow-2xl backdrop-blur-md animate-fade-in text-xs">
+    <div className="absolute right-4 top-14 z-40 w-80 rounded-xl border border-border bg-surface p-4 shadow-2xl backdrop-blur-md animate-fade-in text-xs">
       <div className="flex items-center justify-between border-b border-border pb-2 mb-3">
         <span className="font-bold text-foreground">Proof &amp; Composition Settings</span>
         <button
@@ -52,7 +62,7 @@ export default function SettingsPanel({
       </div>
 
       <div className="space-y-4">
-        {/* Document Group */}
+        {/* Document Geometry */}
         <div>
           <label className="block text-[11px] font-semibold text-muted uppercase tracking-wider mb-1.5">
             Document Geometry
@@ -93,27 +103,53 @@ export default function SettingsPanel({
           </select>
         </div>
 
-        {/* Workspace Layout */}
-        <div>
-          <label className="block text-[11px] font-semibold text-muted uppercase tracking-wider mb-1.5">
-            Workspace Panes
-          </label>
-          <div className="grid grid-cols-3 gap-1">
-            {(["split", "editor", "preview"] as const).map((mode) => (
-              <button
-                key={mode}
-                type="button"
-                onClick={() => onPreviewModeChange(mode)}
-                className={`py-1 rounded text-center capitalize font-medium border transition-colors ${
-                  previewMode === mode
-                    ? "bg-accent text-white border-accent"
-                    : "bg-elevated border-border text-muted hover:text-foreground"
-                }`}
-              >
-                {mode}
-              </button>
-            ))}
+        {/* Table of Contents Toggle */}
+        <div className="flex items-center justify-between border-t border-border pt-3">
+          <div>
+            <span className="font-semibold text-foreground">Table of Contents</span>
+            <p className="text-[10px] text-muted">Generate anchored heading directory</p>
           </div>
+          <button
+            type="button"
+            onClick={() => onTocChange(!toc)}
+            className={`w-10 h-5 rounded-full transition-colors relative p-0.5 ${
+              toc ? "bg-accent" : "bg-elevated border border-border"
+            }`}
+          >
+            <div
+              className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                toc ? "translate-x-5" : "translate-x-0"
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Page Header Template */}
+        <div>
+          <label className="block text-[11px] font-semibold text-muted uppercase tracking-wider mb-1">
+            Header Template
+          </label>
+          <input
+            type="text"
+            value={headerText}
+            onChange={(e) => onHeaderTextChange(e.target.value)}
+            placeholder="e.g. Confidential · 2026"
+            className="w-full rounded border border-border bg-elevated px-2 py-1 text-foreground focus:outline-none focus:border-accent"
+          />
+        </div>
+
+        {/* Page Footer Template */}
+        <div>
+          <label className="block text-[11px] font-semibold text-muted uppercase tracking-wider mb-1">
+            Footer Template
+          </label>
+          <input
+            type="text"
+            value={footerText}
+            onChange={(e) => onFooterTextChange(e.target.value)}
+            placeholder="{page} / {pages}"
+            className="w-full rounded border border-border bg-elevated px-2 py-1 text-foreground focus:outline-none focus:border-accent"
+          />
         </div>
       </div>
     </div>

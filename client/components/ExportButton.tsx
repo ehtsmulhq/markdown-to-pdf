@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { convertToPdf, downloadBlob, type FontFamilyChoice } from "@/lib/api";
+import { convertToPdf, downloadBlob, type FontFamilyChoice, type ConvertOptions } from "@/lib/api";
 
 interface ExportButtonProps {
   markdown: string;
   filename?: string;
   pageType: "letter" | "a4" | "a3";
   fontFamily?: FontFamilyChoice;
+  options?: ConvertOptions;
   onError?: (message: string) => void;
   onStatusChange?: (status: "idle" | "loading" | "success" | "error", filename?: string, error?: string) => void;
 }
@@ -17,7 +18,6 @@ export function getCleanExportFilename(markdown: string, providedFilename?: stri
     return providedFilename.replace(/\.(md|markdown)$/i, ".pdf");
   }
 
-  // Extract from first # Heading
   const headingMatch = markdown.match(/^#\s+(.+)$/m);
   if (headingMatch && headingMatch[1]) {
     const slug = headingMatch[1]
@@ -37,6 +37,7 @@ export default function ExportButton({
   filename,
   pageType,
   fontFamily = "sans",
+  options = {},
   onError,
   onStatusChange,
 }: ExportButtonProps) {
@@ -51,7 +52,7 @@ export default function ExportButton({
     onStatusChange?.("loading", targetFilename);
 
     try {
-      const blob = await convertToPdf(markdown, pageType, fontFamily);
+      const blob = await convertToPdf(markdown, pageType, fontFamily, options);
       downloadBlob(blob, targetFilename);
       onStatusChange?.("success", targetFilename);
     } catch (error) {
@@ -68,7 +69,7 @@ export default function ExportButton({
       type="button"
       onClick={handleExport}
       disabled={isEmpty || loading}
-      className="btn-primary h-9 flex items-center justify-center gap-2 text-xs font-semibold px-4"
+      className="btn-primary h-8 flex items-center justify-center gap-1.5 text-xs font-semibold px-3"
     >
       {loading ? (
         <>

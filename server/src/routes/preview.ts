@@ -4,9 +4,14 @@ import { markdownToHtml, type FontFamilyChoice } from "../services/markdown.js";
 const router = Router();
 
 router.post("/", async (req: Request, res: Response) => {
-  const { markdown, fontFamily = "sans" } = req.body as {
+  const {
+    markdown,
+    fontFamily = "sans",
+    toc = false,
+  } = req.body as {
     markdown?: string;
     fontFamily?: FontFamilyChoice;
+    toc?: boolean;
   };
 
   if (!markdown || typeof markdown !== "string") {
@@ -15,8 +20,7 @@ router.post("/", async (req: Request, res: Response) => {
   }
 
   try {
-    let html = await markdownToHtml(markdown, fontFamily);
-    // Strip active executable script tags for safe iframe preview
+    let html = await markdownToHtml(markdown, fontFamily, { toc });
     html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
     res.json({ html });
   } catch (error) {

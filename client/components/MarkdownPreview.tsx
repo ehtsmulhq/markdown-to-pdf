@@ -9,6 +9,7 @@ interface MarkdownPreviewProps {
   pageType?: "letter" | "a4" | "a3";
   fontFamily?: FontFamilyChoice;
   isDark?: boolean;
+  toc?: boolean;
 }
 
 const PAGE_SPECS = {
@@ -37,6 +38,7 @@ export default function MarkdownPreview({
   pageType = "a4",
   fontFamily = "sans",
   isDark = true,
+  toc = false,
 }: MarkdownPreviewProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -45,7 +47,7 @@ export default function MarkdownPreview({
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const spec = PAGE_SPECS[pageType];
-  const { html, loading } = usePreview(content, fontFamily);
+  const { html, loading } = usePreview(content, fontFamily, toc);
 
   const recalculatePageCount = () => {
     if (!iframeRef.current || !iframeRef.current.contentDocument) return;
